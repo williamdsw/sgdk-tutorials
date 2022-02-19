@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "make build",
+            "type": "shell",
+            "command": "C:\\sgdk141\\bin\\make",
+            "args": [
+                "-f",
+                "${env:GDK_WIN}\\makefile.gen",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
