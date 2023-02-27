@@ -1,0 +1,18 @@
+How to setup to code for the Sega Genesis & Mega Drive using the SGDK and VS Code
+
+What we need to get started:
+- 7-Zip: https://www.7-zip.org/
+
+- SGDK: https://github.com/Stephane-D/SGDK/releases
+-- Extract to C:/ as SGDK
+
+- Visual Studio Code: https://code.visualstudio.com/
+
+- Java JRE: https://www.java.com/en/download/manual.jsp
+
+- Set environment variable for SGDK on windows pointing to C:/SGDK
+
+- VS Code SGDK Template: https://github.com/pleft/SEGA_VSCode_Template
+-- Copy files and open it on VS Code.
+
+- Blast-Em Emulator: https://www.retrodev.com/blastem/
