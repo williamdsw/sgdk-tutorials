@@ -8,6 +8,7 @@
     ".uss": "css",
     ".uxml": "xml",
     "*.jslib": "javascript",
-    "genesis.h": "c"
+    "genesis.h": "c",
+    "resources.h": "c"
 }
 }

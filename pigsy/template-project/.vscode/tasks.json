@@ -42,7 +42,8 @@
                 "showReuseMessage": false,
                 "clear": true
             },
-            "problemMatcher": []
+            "problemMatcher": [],
+            // "dependsOn": ["clean"]
         },
         {
             "label": "run",
@@ -58,7 +59,8 @@
                 "showReuseMessage": false,
                 "clear": true
             },
-            "problemMatcher": []
-        },
+            "problemMatcher": [],
+            // "dependsOn": ["make"]
+        }
     ]
 }

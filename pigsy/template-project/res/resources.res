@@ -1,2 +1,2 @@
-IMAGE background "images/background.png" BEST ALL
-IMAGE foreground "images/foreground.png" BEST ALL
+IMAGE background "images/sonicBG.png" BEST ALL
+IMAGE foreground "images/sonicFG.png" BEST ALL
