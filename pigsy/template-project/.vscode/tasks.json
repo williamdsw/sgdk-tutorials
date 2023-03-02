@@ -4,8 +4,28 @@
     "version": "2.0.0",
     "command": "cmd",
     "type": "shell",
-    "args": ["/C"],
+    "args": [
+        "/C"
+    ],
     "tasks": [
+        {
+            "label": "clean",
+            "command": "${env:GDK}\\bin\\make",
+            "args": [
+                "clean",
+                "-f",
+                "${env:GDK}\\makefile.gen"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": []
+        },
         {
             "group": "build",
             "label": "make",
@@ -25,12 +45,10 @@
             "problemMatcher": []
         },
         {
-            "label": "clean",
-            "command": "${env:GDK}\\bin\\make",
+            "label": "run",
+            "command": "${env:GENS}",
             "args": [
-                "clean",
-                "-f",
-                "${env:GDK}\\makefile.gen"
+                "${cwd}\\out\\rom.bin"
             ],
             "presentation": {
                 "echo": true,
@@ -41,6 +59,6 @@
                 "clear": true
             },
             "problemMatcher": []
-        }
+        },
     ]
 }
