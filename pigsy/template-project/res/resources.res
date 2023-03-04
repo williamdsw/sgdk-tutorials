@@ -5,3 +5,4 @@ IMAGE foreground "images/backgrounds/sonic_fg.png" BEST ALL
 SPRITE our_sprite "images/sprites/sonic_idle.png" 6 6 FAST 0
 
 SPRITE axel_spritesheet "images/spritesheets/axel.png" 15 16 FAST 8
+SPRITE sonic_spritesheet "images/spritesheets/sonic.png" 6 6 FAST 10
