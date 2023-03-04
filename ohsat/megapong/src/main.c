@@ -206,25 +206,26 @@ int main()
     VDP_loadTileSet(bgtile.tileset, 1, DMA);
 
     // Extrai paleta de cores do 'bgtile', e adiciona ao 'PAL1'
-    VDP_setPalette(PAL1, bgtile.palette->data);
+    // VDP_setPalette(PAL1, bgtile.palette->data);
+    PAL_setPalette(PAL1, bgtile.palette->data, DMA);
 
-    // Exibe tileset no PLAN_A na posicao (2,2)
+    // Exibe tileset no BG_A na posicao (2,2)
     // TILE_ATTR_FULL (...)
     // - PAL1 = paleta a ser usada pelo tile
-    // - prio = permite sobreescrever prioridade de desenhar o tile (PLAN_A, PLAN_2)
+    // - prio = permite sobreescrever prioridade de desenhar o tile (BG_A, BG_B)
     // - flipV = inverte o tile verticalmente
     // - flipX = inverte o tile horizontalmente
     // - index = indice do tile na VRAM
-    VDP_setTileMapXY(PLAN_A, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 2, 2);
+    VDP_setTileMapXY(BG_A, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 2, 2);
 
     // Desenha uma mapa de tiles retangular aonde:
     // x, y = pontos de partida
     // w, h = dimensoes do retangulo
-    VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 0, 40, 30);
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 0, 40, 30);
 
     // Inicializa a Sprite Engine com parametros default
     // SPR_init (max_sprites, VRAM_size, unpack_buffer_size)
-    SPR_init(0, 0, 0);
+    SPR_init();
 
     // Adiciona sprite ao objeto
     // spriteDef* = Endereco na memoria do sprite compilado no resources
@@ -234,7 +235,7 @@ int main()
     paddle = SPR_addSprite(&paddleSprite, paddlePositionX, PADDLE_POSITION_Y, TILE_ATTR(PAL1, 0, FALSE, FALSE));
 
     // Desenha a HUD de score
-    VDP_setTextPlan(PLAN_A);
+    VDP_setTextPlane(BG_A);
     VDP_drawText(labelScore, 1, 1);
     updateScoreDisplay();
 
@@ -253,7 +254,8 @@ int main()
         SPR_update();
 
         // Espera atualizacao da tela
-        VDP_waitVSync();
+        // For versions prior to SGDK 1.60 use VDP_waitVSync instead.
+        SYS_doVBlankProcess();
     }
 
     return (0);

@@ -3,34 +3,64 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "command": "cmd",
+    "type": "shell",
     "args": [
         "/C"
     ],
     "tasks": [
         {
-            "label": "make",
-            "type": "shell",
-            "command": "cmd",
-            "args": [
-                "/C",
-                "${env:GDK}\\bin\\make",
-                "-f",
-                "${env:GDK}\\makefile.gen"
-            ],
-            "problemMatcher": []
-        },
-        {
             "label": "clean",
-            "type": "shell",
-            "command": "cmd",
+            "command": "${env:GDK}\\bin\\make",
             "args": [
-                "/C",
-                "${env:GDK}\\bin\\make",
                 "clean",
                 "-f",
                 "${env:GDK}\\makefile.gen"
             ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
             "problemMatcher": []
+        },
+        {
+            "group": "build",
+            "label": "make",
+            "command": "${env:GDK}\\bin\\make",
+            "args": [
+                "-f",
+                "${env:GDK}\\makefile.gen"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            // "dependsOn": ["clean"]
+        },
+        {
+            "label": "run",
+            "command": "${env:GENS}",
+            "args": [
+                "${cwd}\\out\\rom.bin"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            // "dependsOn": ["make"]
         }
     ]
 }
