@@ -4,5 +4,6 @@
 extern const Image background;
 extern const Image foreground;
 extern const SpriteDefinition our_sprite;
+extern const SpriteDefinition axel_spritesheet;
 
 #endif // _RES_RESOURCES_H_
