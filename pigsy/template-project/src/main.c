@@ -14,12 +14,17 @@
 #define PLAYER_ANIMATION_UPPER 3
 
 Sprite *player;
+
 int player_x_position = 100;
 int player_y_position = 50;
+int player_attack_timer = 0;
+const int PLAYER_ATTACK_DURATION = 56;
+
 bool isFacingRight = TRUE;
 bool isMoving = FALSE;
 
-static void handleInput()
+// Good for hold events, like moving, holding/charging attack
+static void handleMoveInput()
 {
     u16 value = JOY_readJoypad(JOY_1);
     isMoving = FALSE;
@@ -62,6 +67,30 @@ static void handleInput()
     SPR_setPosition(player, player_x_position, player_y_position);
 }
 
+// Pressed once, good for jumping, attack, menu controls
+static void joyEvent(u16 joy, u16 changed, u16 state)
+{
+    if ((changed & state & BUTTON_B) && player_attack_timer == 0)
+    {
+        SPR_setAnim(player, PLAYER_ANIMATION_UPPER);
+        player_attack_timer += 1;
+    }
+}
+
+static void checkAttackTimer()
+{
+    if (player_attack_timer == 0)
+    {
+        handleMoveInput();
+    }
+    else if (player_attack_timer > 0 && player_attack_timer < PLAYER_ATTACK_DURATION)
+    {
+        player_attack_timer += 1;
+    }
+    else
+        player_attack_timer = 0;
+}
+
 int main()
 {
     // Use PAL0 for background images
@@ -84,6 +113,8 @@ int main()
     player = SPR_addSprite(&axel_spritesheet, player_x_position, player_y_position, TILE_ATTR(PAL2, FALSE, FALSE, TRUE));
     SPR_setAnim(player, PLAYER_ANIMATION_IDLE);
 
+    JOY_setEventHandler(joyEvent);
+
     while (1)
     {
         // Scrolling for background
@@ -94,7 +125,7 @@ int main()
         // VDP_setHorizontalScroll(BG_A, horizontalScrollOffsetForeground);
         // horizontalScrollOffsetForeground -= 2;
 
-        handleInput();
+        checkAttackTimer();
 
         SPR_update();
 
