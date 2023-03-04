@@ -1,20 +1,20 @@
 #include <genesis.h>
 #include <string.h>
-#include "../res/resources.h"
+#include <resources.h>
 
-#define ANIMATION_RUN   0
-#define ANIMATION_JUMP  1
+#define ANIMATION_RUN 0
+#define ANIMATION_JUMP 1
 
 //------------------------------------------------------------------//
 // FIELDS
 
 // Text labels
-const char MESSAGE_START[22] = "Press START to Begin!";
-const char MESSAGE_RESET[22] = "Press START to Reset!";
+char MESSAGE_START[22] = "Press START to Begin!";
+char MESSAGE_RESET[22] = "Press START to Reset!";
 
 const int SCROLL_SPEED = 2;
-const int FLOOR_HEIGHT = 128;   // altura do chao
-fix16 gravity = FIX16 (0.2);
+const int FLOOR_HEIGHT = 128; // altura do chao
+fix16 gravity = FIX16(0.2);
 
 // Score
 int currentScore = 0;
@@ -22,14 +22,14 @@ char labelScore[6] = "SCORE\0";
 char textScore[3] = "0";
 
 // Player
-Sprite* player;
+Sprite *player;
 const int PLAYER_POSITION_X = 32;
-fix16 playerPositionY = FIX16 (112);      // fix16 e tipo para disfarcar floats
-fix16 playerVelocityY = FIX16 (0);
+fix16 playerPositionY = FIX16(112); // fix16 e tipo para disfarcar floats
+fix16 playerVelocityY = FIX16(0);
 int playerHeight = 16;
 
 // Obstacle
-Sprite* obstacle;
+Sprite *obstacle;
 int obstaclePositionX = 320;
 int obstaclePositionY = 128;
 int obstacleVelocityX = 0;
@@ -42,48 +42,48 @@ bool wasScoreAdded = FALSE;
 //------------------------------------------------------------------//
 // HELPER FUNCTIONS
 
-void showText (char text[])
+void showText(char text[])
 {
-    int x = (20 - strlen (text) / 2);
-    VDP_drawText (text, x, 10);
+    int x = (20 - strlen(text) / 2);
+    VDP_drawText(text, x, 10);
 }
 
-void clearText ()
+void clearText()
 {
-    VDP_clearText (0, 10, 32);
+    VDP_clearText(0, 10, 32);
 }
 
-void updateScoreDisplay ()
+void updateScoreDisplay()
 {
-    sprintf (textScore, "%d", currentScore);
-    VDP_clearText (1, 2, 3);
-    VDP_drawText (textScore, 10, 2);
+    sprintf(textScore, "%d", currentScore);
+    VDP_clearText(1, 2, 3);
+    VDP_drawText(textScore, 10, 2);
 }
 
-void startGame ()
+void startGame()
 {
     if (isGameOn == FALSE)
     {
         isGameOn = TRUE;
-        clearText ();
+        clearText();
     }
 
-    VDP_drawText (labelScore, 10, 1);
+    VDP_drawText(labelScore, 10, 1);
     currentScore = 0;
-    updateScoreDisplay ();
+    updateScoreDisplay();
     obstaclePositionX = 320;
 }
 
-void endGame ()
+void endGame()
 {
     if (isGameOn == TRUE)
     {
-        showText (MESSAGE_RESET);
+        showText(MESSAGE_RESET);
         isGameOn = FALSE;
     }
 }
 
-void joystickHandler (u16 joystick, u16 wasChanged, u16 wasPressed)
+void joystickHandler(u16 joystick, u16 wasChanged, u16 wasPressed)
 {
     if (joystick == JOY_1)
     {
@@ -92,7 +92,7 @@ void joystickHandler (u16 joystick, u16 wasChanged, u16 wasPressed)
         {
             if (isGameOn == FALSE)
             {
-                startGame ();
+                startGame();
             }
         }
 
@@ -102,8 +102,8 @@ void joystickHandler (u16 joystick, u16 wasChanged, u16 wasPressed)
             if (isJumping == FALSE)
             {
                 isJumping = TRUE;
-                playerVelocityY = FIX16 (-4);
-                SPR_setAnim (player, ANIMATION_JUMP);
+                playerVelocityY = FIX16(-4);
+                SPR_setAnim(player, ANIMATION_JUMP);
             }
         }
     }
@@ -112,47 +112,46 @@ void joystickHandler (u16 joystick, u16 wasChanged, u16 wasPressed)
 //------------------------------------------------------------------//
 // MAIN
 
-int main ()
+int main()
 {
     // Inicializa input
-    JOY_init ();
-    JOY_setEventHandler (&joystickHandler);
+    JOY_init();
+    JOY_setEventHandler(&joystickHandler);
 
     // Define o tamanho do plano dos tiles
-    VDP_setPlanSize (32, 32);
+    VDP_setPlanSize(32, 32);
 
     // Permite usar scrolling no plano horizonal e vertical
-    VDP_setScrollingMode (HSCROLL_PLANE, VSCROLL_PLANE);
+    VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 
     // Carrega tiles
-    VDP_loadTileSet (floorImage.tileset, 1, DMA);
-    VDP_loadTileSet (wallImage.tileset, 2, DMA);
-    VDP_loadTileSet (lightPoleImage.tileset, 3, DMA);
+    VDP_loadTileSet(floorImage.tileset, 1, DMA);
+    VDP_loadTileSet(wallImage.tileset, 2, DMA);
+    VDP_loadTileSet(lightPoleImage.tileset, 3, DMA);
 
-    VDP_setPalette (PAL1, lightPoleImage.palette -> data);
-    VDP_setPalette (PAL2, runnerSprite.palette -> data);
+    PAL_setPalette(PAL1, lightPoleImage.palette->data, DMA);
+    PAL_setPalette(PAL2, runnerSprite.palette->data, DMA);
 
     // Define paleta de cores do background baseado numa cor de valor hexadecimal
-    VDP_setPaletteColor (0, RGB24_TO_VDPCOLOR (0x6dc2ca));
+    // VDP_setPaletteColor(0, RGB24_TO_VDPCOLOR(0x6dc2ca));
+    PAL_setColor(0, 0x0844);
 
-    showText (MESSAGE_START);
+    showText(MESSAGE_START);
 
     // Adiciona linha de tiles
-    VDP_fillTileMapRect (PLAN_B, TILE_ATTR_FULL (PAL1, 0, FALSE, FALSE, 1), 0, 16, 32, 1);
-    VDP_fillTileMapRect (PLAN_B, TILE_ATTR_FULL (PAL1, 0, FALSE, TRUE, 2), 0, 17, 32, 14);
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 16, 32, 1);
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, TRUE, 2), 0, 17, 32, 14);
 
     // Parecido com fillTileMapRect, mas calcula quantos tiles serao necessarios
-    VDP_fillTileMapRectInc (PLAN_B, TILE_ATTR_FULL (PAL1, 0, FALSE, FALSE, 3), 15, 13, 2, 3);
+    VDP_fillTileMapRectInc(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 3), 15, 13, 2, 3);
 
     // Inicializa player
-    SPR_init (0, 0, 0);
-    player = SPR_addSprite (&runnerSprite, PLAYER_POSITION_X, playerPositionY, 
-                            TILE_ATTR (PAL2, 0, FALSE, FALSE));
-    SPR_setAnim (player, ANIMATION_RUN);
+    SPR_init();
+    player = SPR_addSprite(&runnerSprite, PLAYER_POSITION_X, playerPositionY, TILE_ATTR(PAL2, 0, FALSE, FALSE));
+    SPR_setAnim(player, ANIMATION_RUN);
 
     // Inicializa obstaculo
-    obstacle = SPR_addSprite (&rockSprite, obstaclePositionX, obstaclePositionY,
-                             TILE_ATTR (PAL2, 0, FALSE, FALSE));
+    obstacle = SPR_addSprite(&rockSprite, obstaclePositionX, obstaclePositionY, TILE_ATTR(PAL2, 0, FALSE, FALSE));
 
     int offset = 0;
 
@@ -162,41 +161,41 @@ int main ()
         if (isGameOn == TRUE)
         {
             // Realiza um scroll horizontal no Plano B com base no valor offset de distancia de frame para frame
-            VDP_setHorizontalScroll (PLAN_B, offset -= SCROLL_SPEED);
+            VDP_setHorizontalScroll(BG_B, offset -= SCROLL_SPEED);
 
-            if (offset <= -256) 
+            if (offset <= -256)
             {
                 offset = 0;
             }
-            
+
             // Atualiza o sprite a cada frame
-            SPR_update ();
+            SPR_update();
 
             // Movimenta obstaculo
-            obstacleVelocityX = - SCROLL_SPEED;
+            obstacleVelocityX = -SCROLL_SPEED;
             obstaclePositionX += obstacleVelocityX;
-            if (obstaclePositionX < -8) 
+            if (obstaclePositionX < -8)
             {
                 obstaclePositionX = 320;
             }
 
             // Aplica velocidade com resultado da soma
-            playerPositionY = fix16Add (playerPositionY, playerVelocityY);
+            playerPositionY = fix16Add(playerPositionY, playerVelocityY);
 
             // Aplica gravidade
-            if (isJumping == TRUE) 
+            if (isJumping == TRUE)
             {
-                playerVelocityY = fix16Add (playerVelocityY, gravity);
+                playerVelocityY = fix16Add(playerVelocityY, gravity);
             }
 
             // Verifica se esta no chao
-            if (isJumping == TRUE && fix16ToInt (playerPositionY) + playerHeight >= (FLOOR_HEIGHT))
+            if (isJumping == TRUE && fix16ToInt(playerPositionY) + playerHeight >= (FLOOR_HEIGHT))
             {
                 isJumping = FALSE;
                 wasScoreAdded = FALSE;
-                playerVelocityY = FIX16 (0);
-                playerPositionY = intToFix16 (FLOOR_HEIGHT - playerHeight);
-                SPR_setAnim (player, ANIMATION_RUN);
+                playerVelocityY = FIX16(0);
+                playerPositionY = intToFix16(FLOOR_HEIGHT - playerHeight);
+                SPR_setAnim(player, ANIMATION_RUN);
             }
 
             // Verifica colisao com obstaculo
@@ -204,25 +203,26 @@ int main ()
             {
                 if (isJumping == FALSE)
                 {
-                    endGame ();
+                    endGame();
                 }
                 else
                 {
                     if (wasScoreAdded == FALSE)
                     {
                         currentScore++;
-                        updateScoreDisplay ();
+                        updateScoreDisplay();
                         wasScoreAdded = TRUE;
                     }
                 }
             }
 
             // Atualiza posicoes dos objetos com base em x & y
-            SPR_setPosition (obstacle, obstaclePositionX, 120);
-            SPR_setPosition (player, PLAYER_POSITION_X, fix16ToInt (playerPositionY));
+            SPR_setPosition(obstacle, obstaclePositionX, 120);
+            SPR_setPosition(player, PLAYER_POSITION_X, fix16ToInt(playerPositionY));
         }
 
-        VDP_waitVSync ();
+        // VDP_waitVSync();
+        SYS_doVBlankProcess();
     }
 
     return (0);

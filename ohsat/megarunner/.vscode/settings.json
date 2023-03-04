@@ -1,6 +1,14 @@
-{
-    "files.associations": {
-        "resources.h": "c",
-        "string.h": "c"
-    }
+{ 
+    "C_Cpp.default.includePath": ["${env:GDK}\\inc",
+        "${env:GDK}\\res",
+    "res",
+    "inc"
+],
+"files.associations": {
+    ".uss": "css",
+    ".uxml": "xml",
+    "*.jslib": "javascript",
+    "genesis.h": "c",
+    "resources.h": "c"
+}
 }
