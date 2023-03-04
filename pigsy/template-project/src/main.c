@@ -8,12 +8,59 @@
 // int horizontalScrollOffsetBackground = 0;
 // int horizontalScrollOffsetForeground = 0;
 
-Sprite *player;
-
 #define PLAYER_ANIMATION_STILL 0
 #define PLAYER_ANIMATION_IDLE 1
 #define PLAYER_ANIMATION_WALK 2
 #define PLAYER_ANIMATION_UPPER 3
+
+Sprite *player;
+int player_x_position = 100;
+int player_y_position = 50;
+bool isFacingRight = TRUE;
+bool isMoving = FALSE;
+
+static void handleInput()
+{
+    u16 value = JOY_readJoypad(JOY_1);
+    isMoving = FALSE;
+
+    if (value & BUTTON_RIGHT)
+    {
+        player_x_position += 1;
+        isMoving = TRUE;
+        isFacingRight = TRUE;
+    }
+    else if (value & BUTTON_LEFT)
+    {
+        player_x_position -= 1;
+        isMoving = TRUE;
+        isFacingRight = FALSE;
+    }
+
+    if (value & BUTTON_UP)
+    {
+        player_y_position -= 1;
+        isMoving = TRUE;
+    }
+    else if (value & BUTTON_DOWN)
+    {
+        player_y_position += 1;
+        isMoving = TRUE;
+    }
+
+    if (isMoving)
+    {
+        SPR_setAnim(player, PLAYER_ANIMATION_WALK);
+    }
+
+    if (!isMoving)
+    {
+        SPR_setAnim(player, PLAYER_ANIMATION_IDLE);
+    }
+
+    SPR_setHFlip(player, isFacingRight);
+    SPR_setPosition(player, player_x_position, player_y_position);
+}
 
 int main()
 {
@@ -34,8 +81,8 @@ int main()
 
     // PAL2 for players
     PAL_setPalette(PAL2, axel_spritesheet.palette->data, DMA);
-    player = SPR_addSprite(&axel_spritesheet, 100, 500, TILE_ATTR(PAL2, FALSE, FALSE, TRUE));
-    SPR_setAnim(player, PLAYER_ANIMATION_UPPER);
+    player = SPR_addSprite(&axel_spritesheet, player_x_position, player_y_position, TILE_ATTR(PAL2, FALSE, FALSE, TRUE));
+    SPR_setAnim(player, PLAYER_ANIMATION_IDLE);
 
     while (1)
     {
@@ -46,6 +93,8 @@ int main()
         // Scrolling for foreground
         // VDP_setHorizontalScroll(BG_A, horizontalScrollOffsetForeground);
         // horizontalScrollOffsetForeground -= 2;
+
+        handleInput();
 
         SPR_update();
 
