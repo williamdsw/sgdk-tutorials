@@ -1,6 +1,6 @@
 #include <genesis.h>
 #include <string.h>
-#include "../res/resources.h"
+#include <resources.h>
 
 // CONSTS
 
@@ -34,6 +34,9 @@ int ballVelocityX = 1;
 int ballVelocityY = 1;
 int ballWidth = 8;
 int ballHeight = 8;
+int frames = 0;
+int ballColor = 0;
+bool isFlashing = FALSE;
 
 Sprite *paddle;
 int paddlePositionX = 144;
@@ -122,6 +125,7 @@ void moveBall()
             // Atualiza pontuacao
             currentScore++;
             updateScoreDisplay();
+            isFlashing = TRUE;
 
             // Aumenta velocidade a cada 10 colisoes
             if (currentScore % 10 == 0)
@@ -234,6 +238,9 @@ int main()
     ball = SPR_addSprite(&ballSprite, 100, 100, TILE_ATTR(PAL1, 0, FALSE, FALSE));
     paddle = SPR_addSprite(&paddleSprite, paddlePositionX, PADDLE_POSITION_Y, TILE_ATTR(PAL1, 0, FALSE, FALSE));
 
+    // Recupera cor da bola
+    ballColor = PAL_getColor(22);
+
     // Desenha a HUD de score
     VDP_setTextPlane(BG_A);
     VDP_drawText(labelScore, 1, 1);
@@ -248,6 +255,29 @@ int main()
         {
             moveBall();
             movePaddle();
+
+            if (isFlashing)
+            {
+                frames++;
+
+                // A cada 4 frames
+                if (frames % 4 == 0)
+                {
+                    PAL_setColor(22, ballColor);
+                }
+                else if (frames % 2 == 0) // A cada 2 frames
+                {
+                    PAL_setColor(22, RGB24_TO_VDPCOLOR(0xffffff));
+                }
+
+                // Reseta cor depois de 30 frames
+                if (frames > 30)
+                {
+                    isFlashing = FALSE;
+                    frames = 0;
+                    PAL_setColor(22, ballColor);
+                }
+            }
         }
 
         // Exibe lista atual de sprites
