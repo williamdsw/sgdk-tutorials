@@ -119,10 +119,10 @@ int main()
     JOY_setEventHandler(&joystickHandler);
 
     // Define o tamanho do plano dos tiles
-    VDP_setPlanSize(32, 32);
+    VDP_setPlaneSize(32, 32, TRUE);
 
     // Permite usar scrolling no plano horizonal e vertical
-    VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
+    VDP_setScrollingMode(HSCROLL_TILE, VSCROLL_PLANE);
 
     // Carrega tiles
     VDP_loadTileSet(floorImage.tileset, 1, DMA);
@@ -139,11 +139,14 @@ int main()
     showText(MESSAGE_START);
 
     // Adiciona linha de tiles
-    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 16, 32, 1);
-    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, TRUE, 2), 0, 17, 32, 14);
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 16, 32, 1); // Chao
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, TRUE, 2), 0, 17, 32, 2);  // Parede
+
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), 0, 19, 32, 1); // Chao na frente
+    VDP_fillTileMapRect(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, TRUE, 2), 0, 20, 32, 8);  // Parede na frente
 
     // Parecido com fillTileMapRect, mas calcula quantos tiles serao necessarios
-    VDP_fillTileMapRectInc(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 3), 15, 13, 2, 3);
+    VDP_fillTileMapRectInc(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 3), 15, 13, 2, 3); // Luzes
 
     // Inicializa player
     SPR_init();
@@ -153,19 +156,34 @@ int main()
     // Inicializa obstaculo
     obstacle = SPR_addSprite(&rockSprite, obstaclePositionX, obstaclePositionY, TILE_ATTR(PAL2, 0, FALSE, FALSE));
 
-    int offset = 0;
+    // Numero de 15 linhas com valores do scroll: 3 linhas para luzes, 2 para chao e 10 para paredes
+    s16 scrollValues[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int scrollIndex = 0;
 
     // Loop do jogo
     while (1)
     {
         if (isGameOn == TRUE)
         {
-            // Realiza um scroll horizontal no Plano B com base no valor offset de distancia de frame para frame
-            VDP_setHorizontalScroll(BG_B, offset -= SCROLL_SPEED);
+            // Definiindo qual tile utilizar para scroll horizontal
+            VDP_setHorizontalScrollTile(BG_B, 13, scrollValues, 15, CPU);
 
-            if (offset <= -256)
+            // Movemento os tiles por velocidades diferentes
+            for (scrollIndex = 0; scrollIndex < 15; scrollIndex++)
             {
-                offset = 0;
+                if (scrollIndex <= 5)
+                {
+                    scrollValues[scrollIndex] -= SCROLL_SPEED;
+                }
+                else
+                {
+                    scrollValues[scrollIndex] -= SCROLL_SPEED + 1;
+                }
+
+                if (scrollValues[scrollIndex] <= -256)
+                {
+                    scrollValues[scrollIndex] = 0;
+                }
             }
 
             // Atualiza o sprite a cada frame
