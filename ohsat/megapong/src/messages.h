@@ -1,0 +1,16 @@
+#ifndef _MESSAGES_H_
+#define _MESSAGES_H_
+
+#ifndef START_MESSAGE
+#define START_MESSAGE "PRESS START TO BEGIN!\0"
+#endif
+
+#ifndef RESET_MESSAGE
+#define RESET_MESSAGE "GAME OVER! PRESS START TO PLAY AGAIN!"
+#endif
+
+#ifndef LABEL_SCORE
+#define LABEL_SCORE "SCORE\0"
+#endif
+
+#endif // _MESSAGES_H_

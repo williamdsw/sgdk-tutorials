@@ -1,42 +1,20 @@
 #include <genesis.h>
 #include <string.h>
 #include <resources.h>
-
-// CONSTS
-
-// Edges of the play field
-
-const int LEFT_EDGE = 0;
-const int RIGHT_EDGE = 320;
-const int TOP_EDGE = 0;
-const int BOTTOM_EDGE = 224;
-
-// Paddle / Player
-
-const int PADDLE_POSITION_Y = 200;
-const int PADDLE_WIDTH = 32;
-const int PADDLE_HEIGHT = 8;
+#include "screen_edges.h"
+#include "messages.h"
+#include "paddle.h"
+#include "ball_props.h"
 
 // FIELDS
 
 int currentScore = 0;
-char labelScore[6] = "SCORE\0";
 char textScore[3] = "0";
 
 bool isGameOn = FALSE;
-char startMessage[22] = "PRESS START TO BEGIN!\0";
-char resetMessage[37] = "GAME OVER! PRESS START TO PLAY AGAIN!";
 
 Sprite *ball;
-int ballPositionX = 100;
-int ballPositionY = 100;
-int ballVelocityX = 1;
-int ballVelocityY = 1;
-int ballWidth = 8;
-int ballHeight = 8;
-int frames = 0;
-int ballColor = 0;
-bool isFlashing = FALSE;
+BallProps ballProps;
 
 Sprite *paddle;
 int paddlePositionX = 144;
@@ -68,7 +46,7 @@ void showText(char text[])
 
 void gameOver()
 {
-    showText(resetMessage);
+    showText(RESET_MESSAGE);
     isGameOn = FALSE;
 }
 
@@ -77,8 +55,10 @@ void startGame()
     currentScore = 0;
     updateScoreDisplay();
 
-    ballPositionX = ballPositionY = 0;
-    ballVelocityX = ballVelocityY = 1;
+    ballProps.position.x = ballProps.position.y = 0;
+    ballProps.velocity.x = ballProps.velocity.y = 1;
+    ballProps.frames = 0;
+    ballProps.isFlashing = FALSE;
 
     paddlePositionX = 144;
 
@@ -91,56 +71,56 @@ void startGame()
 void moveBall()
 {
     // Verifica limites horizontais
-    if (ballPositionX < LEFT_EDGE)
+    if (ballProps.position.x < SCREEN_LEFT_EDGE)
     {
-        ballPositionX = LEFT_EDGE;
-        ballVelocityX = -ballVelocityX;
+        ballProps.position.x = SCREEN_LEFT_EDGE;
+        ballProps.velocity.x = -ballProps.velocity.x;
     }
-    else if (ballPositionX + ballWidth > RIGHT_EDGE)
+    else if (ballProps.position.x + BALL_WIDTH > SCREEN_RIGHT_EDGE)
     {
-        ballPositionX = RIGHT_EDGE - ballWidth;
-        ballVelocityX = -ballVelocityX;
+        ballProps.position.x = SCREEN_RIGHT_EDGE - BALL_WIDTH;
+        ballProps.velocity.x = -ballProps.velocity.x;
     }
 
     // Verifica limites verticais
-    if (ballPositionY < TOP_EDGE)
+    if (ballProps.position.y < SCREEN_TOP_EDGE)
     {
-        ballPositionY = TOP_EDGE;
-        ballVelocityY *= -1;
+        ballProps.position.y = SCREEN_TOP_EDGE;
+        ballProps.velocity.y *= -1;
     }
-    else if (ballPositionY + ballHeight > BOTTOM_EDGE)
+    else if (ballProps.position.y + BALL_HEIGHT > SCREEN_BOTTOM_EDGE)
     {
         gameOver();
     }
 
     // Verifica colisoes horizontais e verticais
-    if (ballPositionX < (paddlePositionX + PADDLE_WIDTH) && (ballPositionX + ballWidth) > paddlePositionX)
+    if (ballProps.position.x < (paddlePositionX + PADDLE_WIDTH) && (ballProps.position.x + BALL_WIDTH) > paddlePositionX)
     {
-        if (ballPositionY < (PADDLE_POSITION_Y + PADDLE_HEIGHT) && (ballPositionY + ballHeight) >= PADDLE_POSITION_Y)
+        if (ballProps.position.y < (PADDLE_POSITION_Y + PADDLE_HEIGHT) && (ballProps.position.y + BALL_HEIGHT) >= PADDLE_POSITION_Y)
         {
             // Inverte a velocidade
-            ballPositionY = PADDLE_POSITION_Y - ballHeight - 1;
-            ballVelocityY *= -1;
+            ballProps.position.y = PADDLE_POSITION_Y - BALL_HEIGHT - 1;
+            ballProps.velocity.y *= -1;
 
             // Atualiza pontuacao
             currentScore++;
             updateScoreDisplay();
-            isFlashing = TRUE;
+            ballProps.isFlashing = TRUE;
 
             // Aumenta velocidade a cada 10 colisoes
             if (currentScore % 10 == 0)
             {
-                ballVelocityX += sign(ballVelocityX);
-                ballVelocityY += sign(ballVelocityY);
+                ballProps.velocity.x += sign(ballProps.velocity.x);
+                ballProps.velocity.y += sign(ballProps.velocity.y);
             }
         }
     }
 
-    ballPositionX += ballVelocityX;
-    ballPositionY += ballVelocityY;
+    ballProps.position.x += ballProps.velocity.x;
+    ballProps.position.y += ballProps.velocity.y;
 
     // Define nova posicao do sprite baseada nas posicoes x e y
-    SPR_setPosition(ball, ballPositionX, ballPositionY);
+    SPR_setPosition(ball, ballProps.position.x, ballProps.position.y);
 }
 
 void inputHandler(u16 joystick, u16 wasChanged, u16 wasPressed)
@@ -182,14 +162,14 @@ void movePaddle()
     paddlePositionX += paddleVelocityX;
 
     // Verifica limites horizontais
-    if (paddlePositionX < LEFT_EDGE)
+    if (paddlePositionX < SCREEN_LEFT_EDGE)
     {
-        paddlePositionX = LEFT_EDGE;
+        paddlePositionX = SCREEN_LEFT_EDGE;
     }
 
-    if (paddlePositionX + PADDLE_WIDTH > RIGHT_EDGE)
+    if (paddlePositionX + PADDLE_WIDTH > SCREEN_RIGHT_EDGE)
     {
-        paddlePositionX = RIGHT_EDGE - PADDLE_WIDTH;
+        paddlePositionX = SCREEN_RIGHT_EDGE - PADDLE_WIDTH;
     }
 
     // Define nova posicao
@@ -239,14 +219,14 @@ int main()
     paddle = SPR_addSprite(&paddleSprite, paddlePositionX, PADDLE_POSITION_Y, TILE_ATTR(PAL1, 0, FALSE, FALSE));
 
     // Recupera cor da bola
-    ballColor = PAL_getColor(22);
+    ballProps.color = PAL_getColor(22);
 
     // Desenha a HUD de score
     VDP_setTextPlane(BG_A);
-    VDP_drawText(labelScore, 1, 1);
+    VDP_drawText(LABEL_SCORE, 1, 1);
     updateScoreDisplay();
 
-    showText(startMessage);
+    showText(START_MESSAGE);
 
     // Loop do jogo
     while (1)
@@ -256,26 +236,26 @@ int main()
             moveBall();
             movePaddle();
 
-            if (isFlashing)
+            if (ballProps.isFlashing)
             {
-                frames++;
+                ballProps.frames++;
 
                 // A cada 4 frames
-                if (frames % 4 == 0)
+                if (ballProps.frames % 4 == 0)
                 {
-                    PAL_setColor(22, ballColor);
+                    PAL_setColor(22, ballProps.color);
                 }
-                else if (frames % 2 == 0) // A cada 2 frames
+                else if (ballProps.frames % 2 == 0) // A cada 2 frames
                 {
                     PAL_setColor(22, RGB24_TO_VDPCOLOR(0xffffff));
                 }
 
                 // Reseta cor depois de 30 frames
-                if (frames > 30)
+                if (ballProps.frames > 30)
                 {
-                    isFlashing = FALSE;
-                    frames = 0;
-                    PAL_setColor(22, ballColor);
+                    ballProps.isFlashing = FALSE;
+                    ballProps.frames = 0;
+                    PAL_setColor(22, ballProps.color);
                 }
             }
         }
