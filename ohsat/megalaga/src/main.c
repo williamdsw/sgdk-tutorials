@@ -5,6 +5,12 @@
 
 #define MAX_ENEMIES 6
 
+#define LEFT_EDGE 0
+#define RIGHT_EDGE 320
+
+#define PLAYER_ANIMATION_STRAIGHT 0
+#define PLAYER_ANIMATION_MOVE 1
+
 Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
 Entity enemies[MAX_ENEMIES];
 
@@ -50,8 +56,9 @@ void generateStarsTiles()
 
 void generateEnemies()
 {
+    int index = 0;
     Entity* enemy = enemies;
-    for (int index = 0; index < MAX_ENEMIES; index++)
+    for (index = 0; index < MAX_ENEMIES; index++)
     {
         enemy->pos.x = index * 32;
         enemy->pos.y = 32;
@@ -66,8 +73,81 @@ void generateEnemies()
     }
 }
 
+void moveEnemies()
+{
+    u16 index = 0;
+    for (index = 0; index < MAX_ENEMIES; index++)
+    {
+        // Ponteiro para o item do array
+        Entity* enemy = &enemies[index];
+        if (enemy->health > 0)
+        {
+            if ((enemy->pos.x + enemy->size.w) > RIGHT_EDGE)
+            {
+                // Mover para esquerda
+                enemy->vel.x = -1;
+            }
+            else if (enemy->pos.x < LEFT_EDGE)
+            {
+                // Mover para direita
+                enemy->vel.x = 1;
+            }
+
+            enemy->pos.x += enemy->vel.x;
+            SPR_setPosition(enemy->sprite, enemy->pos.x, enemy->pos.y);
+        }
+    }
+}
+
+void movePlayer()
+{
+    player.pos.x += player.vel.x;
+
+    if (player.pos.x < LEFT_EDGE)
+    {
+        player.pos.x = LEFT_EDGE;
+    }
+
+    if (player.pos.x + player.size.w > RIGHT_EDGE)
+    {
+        player.pos.x = RIGHT_EDGE - player.size.w;
+    }
+
+    SPR_setPosition(player.sprite, player.pos.x, player.pos.y);
+}
+
+void myJoyHandler(u16 joy, u16 changed, u16 state)
+{
+    if (joy == JOY_1)
+    {
+        if (state & BUTTON_RIGHT)
+        {
+            player.vel.x = 2;
+            SPR_setAnim(player.sprite, PLAYER_ANIMATION_MOVE);
+            SPR_setHFlip(player.sprite, TRUE);
+        }
+        else if (state & BUTTON_LEFT)
+        {
+            player.vel.x = -2;
+            SPR_setAnim(player.sprite, PLAYER_ANIMATION_MOVE);
+            SPR_setHFlip(player.sprite, FALSE);
+        }
+        else
+        {
+            if ((changed & BUTTON_RIGHT) | (changed & BUTTON_LEFT))
+            {
+                player.vel.x = 0;
+                SPR_setAnim(player.sprite, PLAYER_ANIMATION_STRAIGHT);
+            }
+        }
+    }
+}
+
 int main()
 {
+    JOY_init();
+    JOY_setEventHandler(&myJoyHandler);
+
     SYS_disableInts();
 
     VDP_loadTileSet(background.tileset, 1, DMA);
@@ -92,7 +172,10 @@ int main()
         if (offset <= -256)
             offset = 0;
 
-        generateStarsTiles();
+        // generateStarsTiles();
+
+        movePlayer();
+        moveEnemies();
 
         SPR_update();
         SYS_doVBlankProcess();
