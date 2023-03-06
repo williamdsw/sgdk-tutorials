@@ -11,10 +11,14 @@
 #define PLAYER_ANIMATION_STRAIGHT 0
 #define PLAYER_ANIMATION_MOVE 1
 
+#define MAX_BULLETS 3
+
 Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
 Entity enemies[MAX_ENEMIES];
+Entity bullets[MAX_BULLETS];
 
 u16 enemiesLeft = 0;
+u16 bulletsOnScreen = 0;
 
 void initPlayer()
 {
@@ -73,6 +77,22 @@ void generateEnemies()
     }
 }
 
+void generateBullets()
+{
+    int index = 0;
+    Entity* currentBullet = bullets;
+    for (index = 0; index < MAX_BULLETS; index++)
+    {
+        currentBullet->pos.x = 0;
+        currentBullet->pos.y = -10;
+        currentBullet->size.w = currentBullet->size.h = 8;
+        currentBullet->sprite = SPR_addSprite(&bullet, bullets[0].pos.x, bullets[0].pos.y, TILE_ATTR(PAL1, 0, FALSE, FALSE));
+        sprintf(currentBullet->name, "Bu%d", index);
+        currentBullet++;
+    }
+    
+}
+
 void moveEnemies()
 {
     u16 index = 0;
@@ -116,6 +136,55 @@ void movePlayer()
     SPR_setPosition(player.sprite, player.pos.x, player.pos.y);
 }
 
+void moveBullets()
+{
+    u16 index = 0;
+    Entity *currentBullet;
+    for (index = 0; index < MAX_BULLETS; index++)
+    {
+        currentBullet = &bullets[index];
+        if (currentBullet->health > 0)
+        {
+            currentBullet->pos.y += currentBullet->vel.y;
+
+            if (currentBullet->pos.y + currentBullet->size.h < 0)
+            {
+                killEntity(currentBullet);
+                bulletsOnScreen--;
+            }
+            else
+            {
+                SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
+            }
+        }
+    }
+}
+
+void shootBullet()
+{
+    if (bulletsOnScreen < MAX_BULLETS)
+    {
+        Entity *currentBullet;
+        u16 index = 0;
+        for (index = 0; index < MAX_BULLETS; index++)
+        {
+            currentBullet = &bullets[index];
+            if (currentBullet->health == 0)
+            {
+                currentBullet->pos.x = player.pos.x + 4;
+                currentBullet->pos.y = player.pos.y;
+
+                reviveEntity(currentBullet);
+                currentBullet->vel.y = -3;
+
+                SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
+                bulletsOnScreen++;
+                break;
+            }
+        }
+    }
+}
+
 void myJoyHandler(u16 joy, u16 changed, u16 state)
 {
     if (joy == JOY_1)
@@ -140,6 +209,12 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
                 SPR_setAnim(player.sprite, PLAYER_ANIMATION_STRAIGHT);
             }
         }
+
+        if (state & BUTTON_B & changed)
+        {
+            VDP_drawText("Pressed", 0, 0);
+            shootBullet();
+        }
     }
 }
 
@@ -159,6 +234,7 @@ int main()
     SPR_update();
 
     generateEnemies();
+    generateBullets();
 
     // Indexes for PAL2 = 32-47
     PAL_setColor(34, RGB24_TO_VDPCOLOR(0x0078f8));
@@ -175,6 +251,7 @@ int main()
         // generateStarsTiles();
 
         movePlayer();
+        moveBullets();
         moveEnemies();
 
         SPR_update();
