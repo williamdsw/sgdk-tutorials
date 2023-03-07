@@ -4,14 +4,16 @@
 #include "entity.h"
 
 #define MAX_ENEMIES 6
+#define MAX_BULLETS 6
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 320
+#define BOTTOM_EDGE 224
 
 #define PLAYER_ANIMATION_STRAIGHT 0
 #define PLAYER_ANIMATION_MOVE 1
 
-#define MAX_BULLETS 3
+#define SHOT_INTERVAL 120
 
 Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
 Entity enemies[MAX_ENEMIES];
@@ -19,6 +21,7 @@ Entity bullets[MAX_BULLETS];
 
 u16 enemiesLeft = 0;
 u16 bulletsOnScreen = 0;
+u16 shotTicker = 0;
 
 int score = 0;
 char hudString[40] = "";
@@ -98,6 +101,8 @@ void generateBullets()
 
 void moveEnemies()
 {
+    shotTicker++;
+
     u16 index = 0;
     for (index = 0; index < MAX_ENEMIES; index++)
     {
@@ -118,6 +123,15 @@ void moveEnemies()
 
             enemy->pos.x += enemy->vel.x;
             SPR_setPosition(enemy->sprite, enemy->pos.x, enemy->pos.y);
+
+            if (shotTicker >= SHOT_INTERVAL)
+            {
+                if ((random() % (10 - 1 + 1) + 1) > 4)
+                {
+                    shootBullet(*enemy);
+                    shotTicker = 0;
+                }
+            }
         }
     }
 }
@@ -155,6 +169,11 @@ void moveBullets()
                 killEntity(currentBullet);
                 bulletsOnScreen--;
             }
+            else if (currentBullet->pos.y > BOTTOM_EDGE)
+            {
+                killEntity(currentBullet);
+                bulletsOnScreen--;
+            }
             else
             {
                 SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
@@ -163,8 +182,10 @@ void moveBullets()
     }
 }
 
-void shootBullet()
+void shootBullet(Entity shooter)
 {
+    bool fromPlayer = (shooter.pos.y > 100);
+
     if (bulletsOnScreen < MAX_BULLETS)
     {
         Entity *currentBullet;
@@ -174,11 +195,11 @@ void shootBullet()
             currentBullet = &bullets[index];
             if (currentBullet->health == 0)
             {
-                currentBullet->pos.x = player.pos.x + 4;
-                currentBullet->pos.y = player.pos.y;
+                currentBullet->pos.x = shooter.pos.x + 4;
+                currentBullet->pos.y = shooter.pos.y;
 
                 reviveEntity(currentBullet);
-                currentBullet->vel.y = -3;
+                currentBullet->vel.y = (fromPlayer ? -3 : 3);
 
                 SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
                 bulletsOnScreen++;
@@ -222,7 +243,7 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 
         if (state & BUTTON_B & changed)
         {
-            shootBullet();
+            shootBullet(player);
         }
     }
 }
@@ -247,23 +268,33 @@ void handleCollisions()
         currentBullet = &bullets[index];
         if (currentBullet->health > 0)
         {
-            for (subIndex = 0; subIndex < MAX_ENEMIES; subIndex++)
+            if (currentBullet->vel.y < 0)
             {
-                currentEnemy = &enemies[subIndex];
-                if (currentEnemy->health > 0)
+                for (subIndex = 0; subIndex < MAX_ENEMIES; subIndex++)
                 {
-                    if (collideEntities(currentBullet, currentEnemy))
+                    currentEnemy = &enemies[subIndex];
+                    if (currentEnemy->health > 0)
                     {
-                        killEntity(currentEnemy);
-                        killEntity(currentBullet);
+                        if (collideEntities(currentBullet, currentEnemy))
+                        {
+                            killEntity(currentEnemy);
+                            killEntity(currentBullet);
 
-                        enemiesLeft--;
-                        bulletsOnScreen--;
+                            enemiesLeft--;
+                            bulletsOnScreen--;
 
-                        score += 10;
-                        updateScoreDisplay();
-                        break;
+                            score += 10;
+                            updateScoreDisplay();
+                            break;
+                        }
                     }
+                }
+            }
+            else
+            {
+                if (collideEntities(currentBullet, &player))
+                {
+                    killEntity(&player);
                 }
             }
         }
