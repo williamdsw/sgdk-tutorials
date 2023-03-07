@@ -20,6 +20,9 @@ Entity bullets[MAX_BULLETS];
 u16 enemiesLeft = 0;
 u16 bulletsOnScreen = 0;
 
+int score = 0;
+char hudString[40] = "";
+
 void initPlayer()
 {
     player.pos.x = 152;
@@ -185,6 +188,13 @@ void shootBullet()
     }
 }
 
+void updateScoreDisplay()
+{
+    sprintf(hudString, "SCORE: %d - LEFT: %d", score, enemiesLeft);
+    VDP_clearText(0, 0, 40);
+    VDP_drawText(hudString, 0, 0);
+}
+
 void myJoyHandler(u16 joy, u16 changed, u16 state)
 {
     if (joy == JOY_1)
@@ -212,8 +222,50 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 
         if (state & BUTTON_B & changed)
         {
-            VDP_drawText("Pressed", 0, 0);
             shootBullet();
+        }
+    }
+}
+
+int collideEntities(Entity* a, Entity* b)
+{
+    return (a->pos.x < b->pos.x + b->size.w && // A menor que B em X
+            a->pos.x + a->size.w > b->pos.x && // A maior que B em X
+            a->pos.y < b->pos.y + b->size.h && // A menor que B em Y
+            a->pos.y + a->size.h > b->pos.y); // A maior que B em Y
+}
+
+void handleCollisions()
+{
+    Entity* currentBullet;
+    Entity* currentEnemy;
+    int index = 0;
+    int subIndex = 0;
+
+    for (index = 0; index < MAX_BULLETS; index++)
+    {
+        currentBullet = &bullets[index];
+        if (currentBullet->health > 0)
+        {
+            for (subIndex = 0; subIndex < MAX_ENEMIES; subIndex++)
+            {
+                currentEnemy = &enemies[subIndex];
+                if (currentEnemy->health > 0)
+                {
+                    if (collideEntities(currentBullet, currentEnemy))
+                    {
+                        killEntity(currentEnemy);
+                        killEntity(currentBullet);
+
+                        enemiesLeft--;
+                        bulletsOnScreen--;
+
+                        score += 10;
+                        updateScoreDisplay();
+                        break;
+                    }
+                }
+            }
         }
     }
 }
@@ -236,6 +288,8 @@ int main()
     generateEnemies();
     generateBullets();
 
+    updateScoreDisplay();
+
     // Indexes for PAL2 = 32-47
     PAL_setColor(34, RGB24_TO_VDPCOLOR(0x0078f8));
 
@@ -253,6 +307,7 @@ int main()
         movePlayer();
         moveBullets();
         moveEnemies();
+        handleCollisions();
 
         SPR_update();
         SYS_doVBlankProcess();
