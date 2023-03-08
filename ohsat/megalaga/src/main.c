@@ -5,6 +5,7 @@
 
 #define MAX_ENEMIES 6
 #define MAX_BULLETS 6
+#define MAX_PLAYER_BULLETS 3
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 320
@@ -22,6 +23,7 @@ Entity bullets[MAX_BULLETS];
 u16 enemiesLeft = 0;
 u16 bulletsOnScreen = 0;
 u16 shotTicker = 0;
+u16 shotByPlayer = 0;
 
 int score = 0;
 char hudString[40] = "";
@@ -168,6 +170,7 @@ void moveBullets()
             {
                 killEntity(currentBullet);
                 bulletsOnScreen--;
+                shotByPlayer--;
             }
             else if (currentBullet->pos.y > BOTTOM_EDGE)
             {
@@ -188,6 +191,14 @@ void shootBullet(Entity shooter)
 
     if (bulletsOnScreen < MAX_BULLETS)
     {
+        if (fromPlayer)
+        {
+            if (shotByPlayer >= MAX_PLAYER_BULLETS)
+            {
+                return;
+            }
+        }
+
         Entity *currentBullet;
         u16 index = 0;
         for (index = 0; index < MAX_BULLETS; index++)
@@ -200,6 +211,11 @@ void shootBullet(Entity shooter)
 
                 reviveEntity(currentBullet);
                 currentBullet->vel.y = (fromPlayer ? -3 : 3);
+
+                if (fromPlayer)
+                {
+                    shotByPlayer++;
+                }
 
                 SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
                 bulletsOnScreen++;
@@ -282,6 +298,7 @@ void handleCollisions()
 
                             enemiesLeft--;
                             bulletsOnScreen--;
+                            shotByPlayer--;
 
                             score += 10;
                             updateScoreDisplay();
