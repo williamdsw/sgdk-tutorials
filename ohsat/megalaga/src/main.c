@@ -2,6 +2,7 @@
 #include <genesis.h>
 #include <resources.h>
 #include "entity.h"
+#include "powerup.h"
 
 #define MAX_ENEMIES 6
 #define MAX_BULLETS 6
@@ -16,11 +17,14 @@
 
 #define SHOT_INTERVAL 120
 
-// SFX start at index 64
 #define SFX_LASER 64
 #define SFX_EXPLOSION 65
 
-Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
+#define POWERUP_DURATION 180
+
+Entity player = { 0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER" };
+Entity powerUp = { 0, 0, 8, 8, 0, 0, 0, NULL };
+
 Entity enemies[MAX_ENEMIES];
 Entity bullets[MAX_BULLETS];
 
@@ -28,6 +32,8 @@ u16 enemiesLeft = 0;
 u16 bulletsOnScreen = 0;
 u16 shotTicker = 0;
 u16 shotByPlayer = 0;
+u16 maxPlayerBullets = MAX_PLAYER_BULLETS;
+u16 powerUpTimer = 0;
 
 int score = 0;
 char hudString[40] = "";
@@ -197,7 +203,7 @@ void shootBullet(Entity shooter)
     {
         if (fromPlayer)
         {
-            if (shotByPlayer >= MAX_PLAYER_BULLETS)
+            if (shotByPlayer >= maxPlayerBullets)
             {
                 return;
             }
@@ -311,6 +317,11 @@ void handleCollisions()
                             updateScoreDisplay();
                             XGM_startPlayPCM(SFX_EXPLOSION, 1, SOUND_PCM_CH3);
 
+                            if (enemiesLeft % 5 == 0)
+                            {
+                                spawnPowerUpAt(currentEnemy->pos.x, currentEnemy->pos.y);
+                            }
+
                             break;
                         }
                     }
@@ -326,6 +337,56 @@ void handleCollisions()
             }
         }
     }
+}
+
+void spawnPowerUpAt(u16 x, u16 y)
+{
+    powerUp.pos.x = x;
+    powerUp.pos.y = y;
+    reviveEntity(&powerUp);
+}
+
+void movePowerUp()
+{
+    if (powerUp.health > 0)
+    {
+        powerUp.pos.y++;
+
+        if (powerUp.pos.y > BOTTOM_EDGE)
+        {
+            killEntity(&powerUp);
+        }
+
+        if (collideEntities(&player, &powerUp))
+        {
+            activatePowerUp(RapidFire);
+            killEntity(&powerUp);
+        }
+    }
+
+    SPR_setPosition(powerUp.sprite, powerUp.pos.x, powerUp.pos.y);
+}
+
+void activatePowerUp(PowerUp type)
+{
+    switch (type)
+    {
+        case RapidFire:
+        {
+            maxPlayerBullets = MAX_BULLETS;
+            powerUpTimer = POWERUP_DURATION;
+            PAL_setColor(18, RGB24_TO_VDPCOLOR(0xf8fc00));
+            break;
+        }
+
+        default: return;
+    }
+}
+
+void deactivatePowerUp()
+{
+    maxPlayerBullets = MAX_PLAYER_BULLETS;
+    PAL_setColor(18, RGB24_TO_VDPCOLOR(0xf83800));
 }
 
 int main()
@@ -349,6 +410,9 @@ int main()
     generateEnemies();
     generateBullets();
 
+    powerUp.sprite = SPR_addSprite(&powerUpSprite, powerUp.pos.x, powerUp.pos.y, TILE_ATTR(PAL1, 0, FALSE, FALSE));
+    killEntity(&powerUp);
+
     updateScoreDisplay();
 
     // Indexes for PAL2 = 32-47
@@ -368,7 +432,17 @@ int main()
         movePlayer();
         moveBullets();
         moveEnemies();
+        movePowerUp();
         handleCollisions();
+
+        if (powerUpTimer > 0)
+        {
+            powerUpTimer--;
+            if (powerUpTimer == 0)
+            {
+                deactivatePowerUp();
+            }
+        }
 
         SPR_update();
         SYS_doVBlankProcess();
