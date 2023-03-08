@@ -16,6 +16,10 @@
 
 #define SHOT_INTERVAL 120
 
+// SFX start at index 64
+#define SFX_LASER 64
+#define SFX_EXPLOSION 65
+
 Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
 Entity enemies[MAX_ENEMIES];
 Entity bullets[MAX_BULLETS];
@@ -219,6 +223,9 @@ void shootBullet(Entity shooter)
 
                 SPR_setPosition(currentBullet->sprite, currentBullet->pos.x, currentBullet->pos.y);
                 bulletsOnScreen++;
+
+                XGM_startPlayPCM(SFX_LASER, 1, SOUND_PCM_CH2);
+
                 break;
             }
         }
@@ -302,6 +309,8 @@ void handleCollisions()
 
                             score += 10;
                             updateScoreDisplay();
+                            XGM_startPlayPCM(SFX_EXPLOSION, 1, SOUND_PCM_CH3);
+
                             break;
                         }
                     }
@@ -312,6 +321,7 @@ void handleCollisions()
                 if (collideEntities(currentBullet, &player))
                 {
                     killEntity(&player);
+                    XGM_startPlayPCM(SFX_EXPLOSION, 1, SOUND_PCM_CH3);
                 }
             }
         }
@@ -322,6 +332,9 @@ int main()
 {
     JOY_init();
     JOY_setEventHandler(&myJoyHandler);
+
+    XGM_setPCM(SFX_LASER, laserSFX, sizeof(laserSFX));
+    XGM_setPCM(SFX_EXPLOSION, explosionSFX, sizeof(explosionSFX));
 
     SYS_disableInts();
 
