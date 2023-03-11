@@ -1,0 +1,24 @@
+#ifndef _DEFINES_H_
+#define _DEFINES_H_
+
+#define MAX_ENEMIES 6
+#define MAX_BULLETS 6
+#define MAX_PLAYER_BULLETS 3
+
+#define LEFT_EDGE 0
+#define RIGHT_EDGE 320
+#define BOTTOM_EDGE 224
+
+#define PLAYER_ANIMATION_STRAIGHT 0
+#define PLAYER_ANIMATION_MOVE 1
+
+#define SHOT_INTERVAL 120
+
+#define SFX_LASER 64
+#define SFX_EXPLOSION 65
+
+#define POWERUP_DURATION 180
+
+int teste;
+
+#endif // _DEFINES_H_

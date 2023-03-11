@@ -3,24 +3,7 @@
 #include <resources.h>
 #include "entity.h"
 #include "powerup.h"
-
-#define MAX_ENEMIES 6
-#define MAX_BULLETS 6
-#define MAX_PLAYER_BULLETS 3
-
-#define LEFT_EDGE 0
-#define RIGHT_EDGE 320
-#define BOTTOM_EDGE 224
-
-#define PLAYER_ANIMATION_STRAIGHT 0
-#define PLAYER_ANIMATION_MOVE 1
-
-#define SHOT_INTERVAL 120
-
-#define SFX_LASER 64
-#define SFX_EXPLOSION 65
-
-#define POWERUP_DURATION 180
+#include "defines.h"
 
 Entity player = { 0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER" };
 Entity powerUp = { 0, 0, 8, 8, 0, 0, 0, NULL };
