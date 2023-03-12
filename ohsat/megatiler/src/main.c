@@ -33,9 +33,85 @@ void placePlayer(u16 x, u16 y)
 {
     player.tilePosition.x = x;
     player.tilePosition.y = y;
-    player.position.x = player.tilePosition.x * TILE_SIZE;
-    player.position.y = player.tilePosition.y * TILE_SIZE;
+    player.position.x = player.tilePosition.x * LEVEL_TILE_SIZE;
+    player.position.y = player.tilePosition.y * LEVEL_TILE_SIZE;
     player.sprite = SPR_addSprite(&sprPlayer, player.position.x, player.position.y, TILE_ATTR(PAL2, 0, FALSE, FALSE));
+}
+
+int getTileAtXY(u16 x, u16 y)
+{
+    // or &levelTilesIndexes[y][x]
+    return *(&levelTilesIndexes[0][0] + (y * MAP_HEIGHT + x));
+}
+
+void movePlayer(MoveDirection nextDirection)
+{
+    if (!player.isMoving)
+    {
+        switch (nextDirection)
+        {
+            case UP: 
+            {
+                if (player.tilePosition.y > 0 && getTileAtXY(player.tilePosition.x, player.tilePosition.y - 1) != SOLID_TILE)
+                {
+                    player.tilePosition.y =- 1;
+                    player.isMoving = TRUE;
+                    player.moveDirection = nextDirection;
+                }
+            
+                break;
+            }
+
+            case DOWN:
+            {
+                if (player.tilePosition.y < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x, player.tilePosition.y + 1) != SOLID_TILE)
+                {
+                    player.tilePosition.y += 1;
+                    player.isMoving = TRUE;
+                    player.moveDirection = nextDirection;
+                }
+
+                break;
+            }
+
+            case LEFT:
+            {
+                if (player.tilePosition.x > 0 && getTileAtXY(player.tilePosition.x - 1, player.tilePosition.y) != SOLID_TILE)
+                {
+                    player.tilePosition.x -= 1;
+                    player.isMoving = TRUE;
+                    player.moveDirection = nextDirection;
+                }
+
+                break;
+            }
+
+            case RIGHT: 
+            {
+                if (player.tilePosition.x < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x + 1, player.tilePosition.y) != SOLID_TILE)
+                {
+                    player.tilePosition.x += 1;
+                    player.isMoving = TRUE;
+                    player.moveDirection = nextDirection;
+                }
+
+                break;
+            }
+
+            default: break;
+        }
+    }
+}
+
+void myJoyHandler(u16 joy, u16 changed, u16 state)
+{
+    if (joy == JOY_1)
+    {
+        if (state & BUTTON_UP) movePlayer(UP);
+        else if (state & BUTTON_DOWN) movePlayer(DOWN);
+        else if (state & BUTTON_LEFT) movePlayer(LEFT);
+        else if (state & RIGHT) movePlayer(RIGHT);
+    }
 }
 
 void loadLevel()
@@ -70,6 +146,9 @@ int main()
 {
     initGraphics();
     loadLevel();
+
+    JOY_init();
+    JOY_setEventHandler(&myJoyHandler);
 
     while (1)
     {

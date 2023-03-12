@@ -9,6 +9,8 @@
     ".uxml": "xml",
     "*.jslib": "javascript",
     "genesis.h": "c",
-    "resources.h": "c"
+    "resources.h": "c",
+    "entity.h": "c",
+    "defines.h": "c"
 }
 }
