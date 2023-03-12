@@ -11,6 +11,7 @@
     "genesis.h": "c",
     "resources.h": "c",
     "entity.h": "c",
-    "defines.h": "c"
+    "defines.h": "c",
+    "coin.h": "c"
 }
 }

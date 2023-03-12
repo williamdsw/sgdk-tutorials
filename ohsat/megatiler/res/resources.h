@@ -3,5 +3,6 @@
 
 extern const Image imgFloorTiles;
 extern const SpriteDefinition sprPlayer;
+extern const SpriteDefinition sprCoin;
 
 #endif // _RES_RESOURCES_H_
