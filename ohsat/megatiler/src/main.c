@@ -44,7 +44,7 @@ int getTileAtXY(u16 x, u16 y)
     return *(&levelTilesIndexes[0][0] + (y * MAP_HEIGHT + x));
 }
 
-void movePlayer(MoveDirection nextDirection)
+void movePlayerInTile(MoveDirection nextDirection)
 {
     if (!player.isMoving)
     {
@@ -54,9 +54,10 @@ void movePlayer(MoveDirection nextDirection)
             {
                 if (player.tilePosition.y > 0 && getTileAtXY(player.tilePosition.x, player.tilePosition.y - 1) != SOLID_TILE)
                 {
-                    player.tilePosition.y =- 1;
+                    player.tilePosition.y -= 1;
                     player.isMoving = TRUE;
                     player.moveDirection = nextDirection;
+                    SPR_setAnim(player.sprite, ANIMATION_UP);
                 }
             
                 break;
@@ -69,6 +70,7 @@ void movePlayer(MoveDirection nextDirection)
                     player.tilePosition.y += 1;
                     player.isMoving = TRUE;
                     player.moveDirection = nextDirection;
+                    SPR_setAnim(player.sprite, ANIMATION_DOWN);
                 }
 
                 break;
@@ -81,6 +83,8 @@ void movePlayer(MoveDirection nextDirection)
                     player.tilePosition.x -= 1;
                     player.isMoving = TRUE;
                     player.moveDirection = nextDirection;
+                    SPR_setAnim(player.sprite, ANIMATION_SIDE);
+                    SPR_setHFlip(player.sprite, TRUE);
                 }
 
                 break;
@@ -93,6 +97,8 @@ void movePlayer(MoveDirection nextDirection)
                     player.tilePosition.x += 1;
                     player.isMoving = TRUE;
                     player.moveDirection = nextDirection;
+                    SPR_setAnim(player.sprite, ANIMATION_SIDE);
+                    SPR_setHFlip(player.sprite, FALSE);
                 }
 
                 break;
@@ -103,14 +109,29 @@ void movePlayer(MoveDirection nextDirection)
     }
 }
 
+void movePlayerOnPosition()
+{
+    if (player.isMoving)
+    {
+        switch (player.moveDirection)
+        {
+            case UP: player.position.y -= 1; break;
+            case DOWN: player.position.y += 1; break;
+            case LEFT: player.position.x -= 1; break;
+            case RIGHT: player.position.x += 1; break;
+            default: break;
+        }
+    }
+}
+
 void myJoyHandler(u16 joy, u16 changed, u16 state)
 {
     if (joy == JOY_1)
     {
-        if (state & BUTTON_UP) movePlayer(UP);
-        else if (state & BUTTON_DOWN) movePlayer(DOWN);
-        else if (state & BUTTON_LEFT) movePlayer(LEFT);
-        else if (state & RIGHT) movePlayer(RIGHT);
+        if (state & BUTTON_UP) movePlayerInTile(UP);
+        else if (state & BUTTON_DOWN) movePlayerInTile(DOWN);
+        else if (state & BUTTON_LEFT) movePlayerInTile(LEFT);
+        else if (state & BUTTON_RIGHT) movePlayerInTile(RIGHT);
     }
 }
 
@@ -152,7 +173,15 @@ int main()
 
     while (1)
     {
+        movePlayerOnPosition();
+
+        if (player.position.x % LEVEL_TILE_SIZE == 0 && player.position.y % LEVEL_TILE_SIZE == 0)
+        {
+            player.isMoving = FALSE;
+        }
+
         SPR_update();
+        SPR_setPosition(player.sprite, player.position.x, player.position.y);
         SYS_doVBlankProcess();
     }
 
