@@ -17,11 +17,16 @@ u8 levelTilesIndexes[8][8] =
     { 0, 0, 0, 0, 1, 0, 0, 0 },
     { 0, 0, 0, 0, 1, 0, 0, 0 },
     { 0, 6, 0, 0, 1, 6, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 5 },
 };
 
 Entity player = { {0, 0}, {0, 0}, 8, 8, 0, FALSE, NONE, NULL, "PLAYER" };
 Coin coins[MAX_COINS];
+Point exitLocation = { 0, 0 };
+
+u8 numberOfCoinsCollected = 0;
+char hudString[10] = "";
+bool isExitUnlocked = FALSE;
 
 void initGraphics()
 {
@@ -31,6 +36,12 @@ void initGraphics()
 
     // Player
     PAL_setPalette(PAL2, sprPlayer.palette->data, DMA);
+}
+
+void initAudios()
+{
+    XGM_setPCM(SFX_COIN, sfxCoin, sizeof(sfxCoin));
+    XGM_setPCM(SFX_UNLOCK, sfxUnlock, sizeof(sfxUnlock));
 }
 
 void placePlayer(u16 x, u16 y)
@@ -56,6 +67,20 @@ int getTileAtXY(u16 x, u16 y)
 {
     // or &levelTilesIndexes[y][x]
     return *(&levelTilesIndexes[0][0] + (y * MAP_HEIGHT + x));
+}
+
+void updateScoreDisplay()
+{
+    sprintf(hudString, "SCORE: %d", numberOfCoinsCollected);
+    VDP_clearText(0, 0, 10);
+    VDP_drawText(hudString, 8, 0);
+}
+
+void unlockExit()
+{
+    isExitUnlocked = TRUE;
+    VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, FALSE, FALSE, FALSE, 3), exitLocation.x, exitLocation.y);
+    XGM_startPlayPCM(SFX_UNLOCK, 1, SOUND_PCM_CH2);
 }
 
 void movePlayerInTile(MoveDirection nextDirection)
@@ -182,6 +207,12 @@ void loadLevel()
 
                 VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
             }
+            else if (tile == EXIT_TILE)
+            {
+                exitLocation.x = x;
+                exitLocation.y = y;
+                VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
+            }
             else
             {
                 VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, tile + 1), x, y);
@@ -207,6 +238,11 @@ int main()
         if (player.position.x % LEVEL_TILE_SIZE == 0 && player.position.y % LEVEL_TILE_SIZE == 0)
         {
             player.isMoving = FALSE;
+
+            if (isExitUnlocked && player.tilePosition.x == exitLocation.x && player.tilePosition.y == exitLocation.y)
+            {
+                // TODO
+            }
         }
 
         u8 i = 0;
@@ -225,6 +261,14 @@ int main()
                 {
                     coinToCheck->health = 0;
                     SPR_setVisibility(coinToCheck->sprite, HIDDEN);
+                    numberOfCoinsCollected++;
+                    XGM_startPlayPCM(SFX_COIN, 1, SOUND_PCM_CH2);
+                    updateScoreDisplay();
+
+                    if (numberOfCoinsCollected == MAX_COINS)
+                    {
+                        unlockExit();
+                    }
                 }
             }
         }
