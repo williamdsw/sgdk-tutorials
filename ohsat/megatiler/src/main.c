@@ -4,29 +4,21 @@
 #include "defines.h"
 #include "entity.h"
 #include "coin.h"
+#include "levels.h"
 
-#define MAX_COINS 3
+typedef u8 map[MAP_HEIGHT][MAP_WIDTH];
 
-// 0: grass; 1: walls; 2: doors
-u8 levelTilesIndexes[8][8] = 
-{
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 4, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 0, 6, 0 },
-    { 0, 0, 0, 1, 1, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 0, 0, 0 },
-    { 0, 6, 0, 0, 1, 6, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 5 },
-};
-
-Entity player = { {0, 0}, {0, 0}, 8, 8, 0, FALSE, NONE, NULL, "PLAYER" };
+Entity player = {{0, 0}, {0, 0}, 8, 8, 0, FALSE, NONE, NULL, "PLAYER"};
 Coin coins[MAX_COINS];
-Point exitLocation = { 0, 0 };
+Point exitLocation = {0, 0};
 
 u8 numberOfCoinsCollected = 0;
 char hudString[10] = "";
 bool isExitUnlocked = FALSE;
+
+u8* currentLevel;
+static u8 currentLevelIndex = 0;
+map *levelList[3];
 
 void initGraphics()
 {
@@ -60,13 +52,12 @@ void placeCoin(Coin *coin, u16 x, u16 y)
     coin->size.height = 8;
     coin->size.width = 8;
     coin->health = 1;
-    coin->sprite = SPR_addSprite(&sprCoin, coin->position.x, coin->position.y, TILE_ATTR(PAL2, 0 , FALSE, FALSE));
+    coin->sprite = SPR_addSprite(&sprCoin, coin->position.x, coin->position.y, TILE_ATTR(PAL2, 0, FALSE, FALSE));
 }
 
 int getTileAtXY(u16 x, u16 y)
 {
-    // or &levelTilesIndexes[y][x]
-    return *(&levelTilesIndexes[0][0] + (y * MAP_HEIGHT + x));
+    return *(currentLevel + (y * MAP_WIDTH + x));
 }
 
 void updateScoreDisplay()
@@ -89,61 +80,62 @@ void movePlayerInTile(MoveDirection nextDirection)
     {
         switch (nextDirection)
         {
-            case UP: 
+        case UP:
+        {
+            if (player.tilePosition.y > 0 && getTileAtXY(player.tilePosition.x, player.tilePosition.y - 1) != SOLID_TILE)
             {
-                if (player.tilePosition.y > 0 && getTileAtXY(player.tilePosition.x, player.tilePosition.y - 1) != SOLID_TILE)
-                {
-                    player.tilePosition.y -= 1;
-                    player.isMoving = TRUE;
-                    player.moveDirection = nextDirection;
-                    SPR_setAnim(player.sprite, ANIMATION_UP);
-                }
-            
-                break;
+                player.tilePosition.y -= 1;
+                player.isMoving = TRUE;
+                player.moveDirection = nextDirection;
+                SPR_setAnim(player.sprite, ANIMATION_UP);
             }
 
-            case DOWN:
-            {
-                if (player.tilePosition.y < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x, player.tilePosition.y + 1) != SOLID_TILE)
-                {
-                    player.tilePosition.y += 1;
-                    player.isMoving = TRUE;
-                    player.moveDirection = nextDirection;
-                    SPR_setAnim(player.sprite, ANIMATION_DOWN);
-                }
+            break;
+        }
 
-                break;
+        case DOWN:
+        {
+            if (player.tilePosition.y < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x, player.tilePosition.y + 1) != SOLID_TILE)
+            {
+                player.tilePosition.y += 1;
+                player.isMoving = TRUE;
+                player.moveDirection = nextDirection;
+                SPR_setAnim(player.sprite, ANIMATION_DOWN);
             }
 
-            case LEFT:
-            {
-                if (player.tilePosition.x > 0 && getTileAtXY(player.tilePosition.x - 1, player.tilePosition.y) != SOLID_TILE)
-                {
-                    player.tilePosition.x -= 1;
-                    player.isMoving = TRUE;
-                    player.moveDirection = nextDirection;
-                    SPR_setAnim(player.sprite, ANIMATION_SIDE);
-                    SPR_setHFlip(player.sprite, TRUE);
-                }
+            break;
+        }
 
-                break;
+        case LEFT:
+        {
+            if (player.tilePosition.x > 0 && getTileAtXY(player.tilePosition.x - 1, player.tilePosition.y) != SOLID_TILE)
+            {
+                player.tilePosition.x -= 1;
+                player.isMoving = TRUE;
+                player.moveDirection = nextDirection;
+                SPR_setAnim(player.sprite, ANIMATION_SIDE);
+                SPR_setHFlip(player.sprite, TRUE);
             }
 
-            case RIGHT: 
-            {
-                if (player.tilePosition.x < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x + 1, player.tilePosition.y) != SOLID_TILE)
-                {
-                    player.tilePosition.x += 1;
-                    player.isMoving = TRUE;
-                    player.moveDirection = nextDirection;
-                    SPR_setAnim(player.sprite, ANIMATION_SIDE);
-                    SPR_setHFlip(player.sprite, FALSE);
-                }
+            break;
+        }
 
-                break;
+        case RIGHT:
+        {
+            if (player.tilePosition.x < MAP_HEIGHT - 1 && getTileAtXY(player.tilePosition.x + 1, player.tilePosition.y) != SOLID_TILE)
+            {
+                player.tilePosition.x += 1;
+                player.isMoving = TRUE;
+                player.moveDirection = nextDirection;
+                SPR_setAnim(player.sprite, ANIMATION_SIDE);
+                SPR_setHFlip(player.sprite, FALSE);
             }
 
-            default: break;
+            break;
+        }
+
+        default:
+            break;
         }
     }
 }
@@ -154,11 +146,20 @@ void movePlayerOnPosition()
     {
         switch (player.moveDirection)
         {
-            case UP: player.position.y -= 1; break;
-            case DOWN: player.position.y += 1; break;
-            case LEFT: player.position.x -= 1; break;
-            case RIGHT: player.position.x += 1; break;
-            default: break;
+        case UP:
+            player.position.y -= 1;
+            break;
+        case DOWN:
+            player.position.y += 1;
+            break;
+        case LEFT:
+            player.position.x -= 1;
+            break;
+        case RIGHT:
+            player.position.x += 1;
+            break;
+        default:
+            break;
         }
     }
 }
@@ -167,69 +168,94 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 {
     if (joy == JOY_1)
     {
-        if (state & BUTTON_UP) movePlayerInTile(UP);
-        else if (state & BUTTON_DOWN) movePlayerInTile(DOWN);
-        else if (state & BUTTON_LEFT) movePlayerInTile(LEFT);
-        else if (state & BUTTON_RIGHT) movePlayerInTile(RIGHT);
+        if (state & BUTTON_UP)
+            movePlayerInTile(UP);
+        else if (state & BUTTON_DOWN)
+            movePlayerInTile(DOWN);
+        else if (state & BUTTON_LEFT)
+            movePlayerInTile(LEFT);
+        else if (state & BUTTON_RIGHT)
+            movePlayerInTile(RIGHT);
     }
+}
+
+void clearLevel()
+{
+    VDP_clearPlane(BG_B, TRUE);
+    VDP_clearSprites();
+    numberOfCoinsCollected = 0;
+    updateScoreDisplay();
+    isExitUnlocked = FALSE;
 }
 
 void loadLevel()
 {
+    clearLevel();
+    currentLevel = levelList[currentLevelIndex];
+
     u8 x = 0;
     u8 y = 0;
+    u8 i = 0;
+    u8 total = MAP_HEIGHT * MAP_WIDTH;
     u8 tile = 0;
     u8 coinIndex = 0;
     Coin *currentCoin = coins;
 
     SPR_init();
 
-    // y = row
-    for (y = 0; y < MAP_HEIGHT; y++)
+    for (i = 0; i < total; i++)
     {
-        // x = column
-        for (x = 0; x < MAP_WIDTH; x++)
-        {
-            tile = levelTilesIndexes[y][x];
-            if (tile == SPAWN_TILE)
-            {
-                placePlayer(x, y);
-                VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
-            }
-            else if (tile == COIN_TILE)
-            {
-                if (coinIndex < MAX_COINS)
-                {
-                    currentCoin = &coins[coinIndex];
-                    placeCoin(currentCoin, x, y);
-                    coinIndex++;
-                }
+        tile = *(currentLevel + i);
 
-                VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
-            }
-            else if (tile == EXIT_TILE)
+        if (tile == SPAWN_TILE)
+        {
+            placePlayer(x, y);
+            VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
+        }
+        else if (tile == COIN_TILE)
+        {
+            if (coinIndex < MAX_COINS)
             {
-                exitLocation.x = x;
-                exitLocation.y = y;
-                VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
+                currentCoin = &coins[coinIndex];
+                placeCoin(currentCoin, x, y);
+                coinIndex++;
             }
-            else
-            {
-                VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, tile + 1), x, y);
-            }
+
+            VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
+        }
+        else if (tile == EXIT_TILE)
+        {
+            exitLocation.x = x;
+            exitLocation.y = y;
+            VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, 1), x, y);
+        }
+        else
+        {
+            VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, FALSE, FALSE, tile + 1), x, y);
+        }
+
+        x++;
+        if (x >= MAP_WIDTH)
+        {
+            y++;
+            x = 0;
         }
     }
 }
 
 int main()
 {
+    levelList[0] = level1TilesIndexes;
+    levelList[1] = level2TilesIndexes;
+    levelList[2] = level3TilesIndexes;
+
     initGraphics();
     loadLevel();
 
     JOY_init();
     JOY_setEventHandler(&myJoyHandler);
 
-    Coin* coinToCheck;
+    Coin *coinToCheck;
 
     while (1)
     {
@@ -241,7 +267,13 @@ int main()
 
             if (isExitUnlocked && player.tilePosition.x == exitLocation.x && player.tilePosition.y == exitLocation.y)
             {
-                // TODO
+                currentLevelIndex++;
+                if (currentLevelIndex >= NUMBER_OF_LEVELS)
+                {
+                    currentLevelIndex = 0;
+                }
+
+                loadLevel();
             }
         }
 

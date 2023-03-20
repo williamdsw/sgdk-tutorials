@@ -17,4 +17,8 @@
 #define SFX_COIN 64
 #define SFX_UNLOCK 65
 
+#define MAX_COINS 3
+
+#define NUMBER_OF_LEVELS 3
+
 #endif // _DEFINES_H_
