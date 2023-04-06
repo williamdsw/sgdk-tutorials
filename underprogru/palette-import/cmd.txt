@@ -1,0 +1,5 @@
+-- Puting image in indexed mode
+aseprite -b path_to_image --dithering-algorithm ordered --color-mode indexed --save-as path_to_image
+
+-- Adjust the image to the palette
+aseprite -b path_to_picture --palette path_to_picture_palette --color-mode indexed --save-as path_to_picture
