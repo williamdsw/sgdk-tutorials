@@ -34,8 +34,10 @@ List of SGDK development tutorials that I followed
 
 ### Pigsy's Retro Game Dev Tutorials
 
-- [How to Code Large Level Maps on Sega Genesis & Mega Drive - Beginners Game Dev Tutorials](pigsy/create-large-level-maps/)
-- [How to Convert SNES Graphics for the Sega Genesis & Mega Drive - Beginners Game Dev Tutorials](pigsy/convert-snes-graphics/)
+- [How to Code a Camera for a 2D game on the Sega Genesis & Mega Drive](pigsy/2d-camera/)
+- [How to Use 256 Low Resolution Mode on Sega Genesis & Mega Drive](pigsy/256-low-resolution/)
+- [How to use 8, 16 & 32 bit numbers on Sega Genesis & Mega Drive](pigsy/bit-numbers/)
+- [How to Convert SNES Graphics for the Sega Genesis & Mega Drive](pigsy/convert-snes-graphics/)
 - [Template Project](pigsy/template-project/)
 
 ### Under-Prog.ru
