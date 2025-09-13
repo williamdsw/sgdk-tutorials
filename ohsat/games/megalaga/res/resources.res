@@ -7,5 +7,5 @@ SPRITE bullet "images/sprites/bullet.bmp" 1 1 FAST 0
 SPRITE powerUpSprite "images/sprites/powerup.bmp" 1 1 FAST 0
 
 # WAV objName "path" sound_engine (XGM)
-WAV laserSFX "audios/sfx/laser.wav" 5 
-WAV explosionSFX "audios/sfx/explosion.wav" 5
+WAV laserSFX "audios/sfx/laser.wav" XGM 
+WAV explosionSFX "audios/sfx/explosion.wav" XGM 

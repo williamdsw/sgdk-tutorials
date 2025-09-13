@@ -5,8 +5,8 @@
 #include "powerup.h"
 #include "defines.h"
 
-Entity player = { 0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER" };
-Entity powerUp = { 0, 0, 8, 8, 0, 0, 0, NULL };
+Entity player = {0, 0, 16, 16, 0, 0, 0, NULL, "PLAYER"};
+Entity powerUp = {0, 0, 8, 8, 0, 0, 0, NULL};
 
 Entity enemies[MAX_ENEMIES];
 Entity bullets[MAX_BULLETS];
@@ -20,6 +20,12 @@ u16 powerUpTimer = 0;
 
 int score = 0;
 char hudString[40] = "";
+
+int getRandom(int min, int max)
+{
+    // (max - min + 1) + min
+    return (random() % (max - min + 1)) + min;
+}
 
 void initPlayer()
 {
@@ -49,11 +55,12 @@ void generateStarsTiles()
         int thex = index % 40;
         int they = index / 40;
 
-        // (max - min + 1) + min
-        int value = (random() % (10 - 1 + 1)) + 1;
+        int value = getRandom(1, 10);
 
         if (value > 3)
+        {
             value = 1;
+        }
 
         VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL1, 0, 0, 0, value), thex, they);
     }
@@ -62,7 +69,7 @@ void generateStarsTiles()
 void generateEnemies()
 {
     int index = 0;
-    Entity* enemy = enemies;
+    Entity *enemy = enemies;
     for (index = 0; index < MAX_ENEMIES; index++)
     {
         enemy->pos.x = index * 32;
@@ -81,7 +88,7 @@ void generateEnemies()
 void generateBullets()
 {
     int index = 0;
-    Entity* currentBullet = bullets;
+    Entity *currentBullet = bullets;
     for (index = 0; index < MAX_BULLETS; index++)
     {
         currentBullet->pos.x = 0;
@@ -91,7 +98,6 @@ void generateBullets()
         sprintf(currentBullet->name, "Bu%d", index);
         currentBullet++;
     }
-    
 }
 
 void moveEnemies()
@@ -102,7 +108,7 @@ void moveEnemies()
     for (index = 0; index < MAX_ENEMIES; index++)
     {
         // Ponteiro para o item do array
-        Entity* enemy = &enemies[index];
+        Entity *enemy = &enemies[index];
         if (enemy->health > 0)
         {
             if ((enemy->pos.x + enemy->size.w) > RIGHT_EDGE)
@@ -121,7 +127,7 @@ void moveEnemies()
 
             if (shotTicker >= SHOT_INTERVAL)
             {
-                if ((random() % (10 - 1 + 1) + 1) > 4)
+                if (getRandom(1, 10) > 4)
                 {
                     shootBullet(*enemy);
                     shotTicker = 0;
@@ -260,18 +266,18 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
     }
 }
 
-int collideEntities(Entity* a, Entity* b)
+int collideEntities(Entity *a, Entity *b)
 {
     return (a->pos.x < b->pos.x + b->size.w && // A menor que B em X
             a->pos.x + a->size.w > b->pos.x && // A maior que B em X
             a->pos.y < b->pos.y + b->size.h && // A menor que B em Y
-            a->pos.y + a->size.h > b->pos.y); // A maior que B em Y
+            a->pos.y + a->size.h > b->pos.y);  // A maior que B em Y
 }
 
 void handleCollisions()
 {
-    Entity* currentBullet;
-    Entity* currentEnemy;
+    Entity *currentBullet;
+    Entity *currentEnemy;
     int index = 0;
     int subIndex = 0;
 
@@ -354,15 +360,16 @@ void activatePowerUp(PowerUp type)
 {
     switch (type)
     {
-        case RapidFire:
-        {
-            maxPlayerBullets = MAX_BULLETS;
-            powerUpTimer = POWERUP_DURATION;
-            PAL_setColor(18, RGB24_TO_VDPCOLOR(0xf8fc00));
-            break;
-        }
+    case RapidFire:
+    {
+        maxPlayerBullets = MAX_BULLETS;
+        powerUpTimer = POWERUP_DURATION;
+        PAL_setColor(18, RGB24_TO_VDPCOLOR(0xf8fc00));
+        break;
+    }
 
-        default: return;
+    default:
+        return;
     }
 }
 
@@ -404,13 +411,15 @@ int main()
     int offset = 0;
     VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 
+    generateStarsTiles();
+
     while (1)
     {
         VDP_setVerticalScroll(BG_B, offset -= 2);
         if (offset <= -256)
+        {
             offset = 0;
-
-        // generateStarsTiles();
+        }
 
         movePlayer();
         moveBullets();

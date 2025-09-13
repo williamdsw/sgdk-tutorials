@@ -16,7 +16,7 @@ u8 numberOfCoinsCollected = 0;
 char hudString[10] = "";
 bool isExitUnlocked = FALSE;
 
-u8* currentLevel;
+u8 *currentLevel;
 static u8 currentLevelIndex = 0;
 map *levelList[3];
 
@@ -169,13 +169,21 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
     if (joy == JOY_1)
     {
         if (state & BUTTON_UP)
+        {
             movePlayerInTile(UP);
+        }
         else if (state & BUTTON_DOWN)
+        {
             movePlayerInTile(DOWN);
+        }
         else if (state & BUTTON_LEFT)
+        {
             movePlayerInTile(LEFT);
+        }
         else if (state & BUTTON_RIGHT)
+        {
             movePlayerInTile(RIGHT);
+        }
     }
 }
 

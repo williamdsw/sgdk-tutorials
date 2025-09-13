@@ -61,11 +61,11 @@ int main()
 
     while (1)
     {
-        offsetY = fix16Add(offsetY, FIX16(0.2));
-        offsetX = fix16Sub(offsetX, FIX16(0.3));
+        offsetY += FIX16(0.2);
+        offsetX -= FIX16(0.3);
 
-        VDP_setHorizontalScroll(BG_B, fix16ToInt(offsetX));
-        VDP_setVerticalScroll(BG_A, fix16ToInt(offsetY));
+        VDP_setHorizontalScroll(BG_B, F16_toInt(offsetX));
+        VDP_setVerticalScroll(BG_A, F16_toInt(offsetY));
 
         // For versions prior to SGDK 1.60 use VDP_waitVSync instead.
         SYS_doVBlankProcess();

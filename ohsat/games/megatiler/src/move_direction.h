@@ -3,7 +3,11 @@
 
 typedef enum
 {
-    DOWN, LEFT, NONE, RIGHT, UP
+    DOWN,
+    LEFT,
+    NONE,
+    RIGHT,
+    UP
 } MoveDirection;
 
 #endif // _MOVE_DIRECTION_H_

@@ -1,4 +1,3 @@
-
 #include <genesis.h>
 #include <resources.h>
 

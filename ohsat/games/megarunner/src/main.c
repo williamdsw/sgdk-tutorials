@@ -195,21 +195,21 @@ int main()
             }
 
             // Aplica velocidade com resultado da soma
-            playerProps.positionY = fix16Add(playerProps.positionY, playerProps.velocityY);
+            playerProps.positionY += playerProps.velocityY;
 
             // Aplica gravidade
             if (isJumping)
             {
-                playerProps.velocityY = fix16Add(playerProps.velocityY, gravity);
+                playerProps.velocityY += gravity;
             }
 
             // Verifica se esta no chao
-            if (isJumping && fix16ToInt(playerProps.positionY) + playerProps.height >= (FLOOR_HEIGHT))
+            if (isJumping && F16_toInt(playerProps.positionY) + playerProps.height >= (FLOOR_HEIGHT))
             {
                 isJumping = FALSE;
                 wasScoreAdded = FALSE;
                 playerProps.velocityY = FIX16(0);
-                playerProps.positionY = intToFix16(FLOOR_HEIGHT - playerProps.height);
+                playerProps.positionY = FIX16(FLOOR_HEIGHT - playerProps.height);
                 SPR_setAnim(player, PLAYER_ANIMATION_RUN);
             }
 
@@ -233,7 +233,7 @@ int main()
 
             // Atualiza posicoes dos objetos com base em x & y
             SPR_setPosition(obstacle, obstacleProps.position.x, 120);
-            SPR_setPosition(player, PLAYER_POSITION_X, fix16ToInt(playerProps.positionY));
+            SPR_setPosition(player, PLAYER_POSITION_X, F16_toInt(playerProps.positionY));
         }
 
         SYS_doVBlankProcess();

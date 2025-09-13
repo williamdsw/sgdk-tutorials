@@ -7,5 +7,5 @@ SPRITE sprPlayer "images/spritesheets/player.png" 1 1 NONE 20
 SPRITE sprCoin "images/spritesheets/coin.png" 1 1 NONE 20
 
 # WAV objName "path" audio_driver
-WAV sfxCoin "audio/sfx/coin.wav" 0
-WAV sfxUnlock "audio/sfx/unlock.wav" 0
+WAV sfxCoin "audio/sfx/coin.wav" PCM
+WAV sfxUnlock "audio/sfx/unlock.wav" PCM
