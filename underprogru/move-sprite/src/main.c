@@ -43,6 +43,7 @@ int main()
         SPR_setPosition(obj_cup, x, y);
 
         SPR_update();
+
         // For versions prior to SGDK 1.60 use VDP_waitVSync instead.
         SYS_doVBlankProcess();
     }

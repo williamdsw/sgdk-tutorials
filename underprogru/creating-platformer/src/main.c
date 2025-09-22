@@ -45,10 +45,10 @@ bool checkCollision(s16 x, s16 y)
 
 void moveEntity()
 {
-    s16 posX = fix32ToInt(player.position.x);
-    s16 posY = fix32ToInt(player.position.y);
-    s16 spdX = fix32ToInt(player.speed.x);
-    s16 spdY = fix32ToInt(player.speed.y);
+    s16 posX = F32_toInt(player.position.x);
+    s16 posY = F32_toInt(player.position.y);
+    s16 spdX = F32_toInt(player.speed.x);
+    s16 spdY = F32_toInt(player.speed.y);
 
     s16 testPosX;
     s16 testPosY;
@@ -220,10 +220,10 @@ int main()
     PAL_setColors(0, paletteBG.data, 16 * 2, DMA);
     SPR_init();
     PAL_setPalette(PAL3, sprPlayer.palette->data, DMA);
-    setCameraPosition(fix32ToInt(player.position.x), fix32ToInt(player.position.y));
-    setCameraPosition(fix32ToInt(player.position.x) - 1, fix32ToInt(player.position.y) - 1);
+    setCameraPosition(F32_toInt(player.position.x), F32_toInt(player.position.y));
+    setCameraPosition(F32_toInt(player.position.x) - 1, F32_toInt(player.position.y) - 1);
 
-    player.sprite = SPR_addSprite(&sprPlayer, fix32ToInt(player.position.x), fix32ToInt(player.position.y), TILE_ATTR(PAL3, 0, FALSE, FALSE));
+    player.sprite = SPR_addSprite(&sprPlayer, F32_toInt(player.position.x), F32_toInt(player.position.y), TILE_ATTR(PAL3, 0, FALSE, FALSE));
 
     SPR_update();
     SYS_doVBlankProcess();
@@ -234,8 +234,8 @@ int main()
         handleInput();
         moveEntity();
 
-        VDP_showFPS(FALSE);
-        setCameraPosition(fix32ToInt(player.position.x), fix32ToInt(player.position.y));
+        // VDP_showFPS(FALSE);
+        setCameraPosition(F32_toInt(player.position.x), F32_toInt(player.position.y));
 
         SYS_doVBlankProcess();
     }

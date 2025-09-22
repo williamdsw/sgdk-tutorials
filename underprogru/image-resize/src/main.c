@@ -8,7 +8,7 @@ f16 v_scroll_step = FIX16(3);
 
 void HIntHandler()
 {
-    VDP_setVerticalScroll(BG_A, current_line + fix16ToInt(v_offset));
+    VDP_setVerticalScroll(BG_A, current_line + F16_toInt(v_offset));
     v_scroll_step += FIX16(0.02);
     v_offset -= v_scroll_step;
 }

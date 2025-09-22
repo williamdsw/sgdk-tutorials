@@ -36,7 +36,7 @@ int tilesScroll()
     VDP_drawImage(BG_A, &bg1, 0, 0);
 
     // x-axis = tiles, y-axis = meta-tiles
-    VDP_setScrollingMode(HSCROLL_TILE, VSCROLL_2TILE);
+    VDP_setScrollingMode(HSCROLL_TILE, VSCROLL_COLUMN);
 
     s16 offset_mask[6] = {0, 5, 10, 15, 20, 25};
     s16 index = 0;
@@ -80,10 +80,10 @@ int main()
     {
         VDP_setHorizontalScrollLine(BG_A, 0, offset_mask_line, 224, CPU);
 
-        // for (index = 0; index < 224; index++)
-        // {
-        //     offset_mask_line[index] += random() % 10;
-        // }
+        for (index = 0; index < 224; index++)
+        {
+            offset_mask_line[index] += random() % 10;
+        }
 
         // even lines - right, odd lines - left
         for (index = 0; index < 224; index += 2)

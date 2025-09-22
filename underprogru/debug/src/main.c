@@ -31,28 +31,28 @@ void handleInput()
     if (!paused)
     {
         // FIX32 = converts an integer into fake 32-bit fractional number
-        // fix32ToInt = converts a fake 32-bit fractional number into an integer
+        // F32_toInt = converts a fake 32-bit fractional number into an integer
 
         if (value & BUTTON_RIGHT)
         {
             posX += FIX32(5);
-            setCameraPosition(fix32ToInt(posX), fix32ToInt(posY) - 140);
+            setCameraPosition(F32_toInt(posX), F32_toInt(posY) - 140);
         }
         else if (value & BUTTON_LEFT)
         {
             posX -= FIX32(5);
-            setCameraPosition(fix32ToInt(posX), fix32ToInt(posY) - 140);
+            setCameraPosition(F32_toInt(posX), F32_toInt(posY) - 140);
         }
 
         if (value & BUTTON_UP)
         {
             posY -= FIX32(5);
-            setCameraPosition(fix32ToInt(posX), fix32ToInt(posY) - 140);
+            setCameraPosition(F32_toInt(posX), F32_toInt(posY) - 140);
         }
         else if (value & BUTTON_DOWN)
         {
             posY += FIX32(5);
-            setCameraPosition(fix32ToInt(posX), fix32ToInt(posY) - 140);
+            setCameraPosition(F32_toInt(posX), F32_toInt(posY) - 140);
         }
     }
 }
@@ -67,7 +67,7 @@ int main()
 
     bga = MAP_create(&bga_map, BG_B, TILE_ATTR_FULL(0, 0, FALSE, FALSE, ind));
 
-    setCameraPosition(fix32ToInt(posX), fix32ToInt(posY) - 140);
+    setCameraPosition(F32_toInt(posX), F32_toInt(posY) - 140);
     SYS_doVBlankProcess();
 
     PAL_setColors(0, palette_all.data, 16 * 2, DMA);
@@ -76,7 +76,7 @@ int main()
     {
         // FALSE = integer
         // TRUE = float
-        VDP_showFPS(FALSE);
+        // VDP_showFPS(FALSE);
         handleInput();
         SYS_doVBlankProcess();
     }

@@ -1,7 +1,6 @@
 from PIL import Image
 import libimagequant as liq
 
-
 def reduce_png_pallete(image_url):
     print("Reduce image pallete")
     file_format = image_url[image_url.rfind(".")+1:]
