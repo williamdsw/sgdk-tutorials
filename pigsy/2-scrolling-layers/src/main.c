@@ -50,7 +50,7 @@ int main()
     VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
     MAP_scrollTo(level_map, 0, 0);
 
-    spr_dog = SPR_addSprite(&dog_img, fix32ToInt(dog_x), fix32ToInt(dog_y), TILE_ATTR(PAL2, FALSE, FALSE, FALSE));
+    spr_dog = SPR_addSprite(&dog_img, F32_toInt(dog_x), F32_toInt(dog_y), TILE_ATTR(PAL2, FALSE, FALSE, FALSE));
 
     while (1)
     {
@@ -111,8 +111,8 @@ static void handleCamera()
     }
 
     // position of player on map as a whole number
-    s16 player_x_map = fix32ToInt(dog_x);
-    s16 player_y_map = fix32ToInt(dog_y);
+    s16 player_x_map = F32_toInt(dog_x);
+    s16 player_y_map = F32_toInt(dog_y);
 
     // player position on screen
     s16 player_x_position_on_screen = player_x_map - current_camera_x;
@@ -197,5 +197,5 @@ static void handleCamera()
         VDP_setVerticalScroll(BG_B, b_vscroll);
     }
 
-    SPR_setPosition(spr_dog, fix32ToInt(dog_x) - new_camera_x, fix32ToInt(dog_y) - new_camera_y);
+    SPR_setPosition(spr_dog, F32_toInt(dog_x) - new_camera_x, F32_toInt(dog_y) - new_camera_y);
 }

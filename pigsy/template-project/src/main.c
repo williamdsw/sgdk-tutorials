@@ -171,14 +171,18 @@ static void checkAttackTimer()
         player1_attack_timer += 1;
     }
     else
+    {
         player1_attack_timer = 0;
+    }
 
     if (player2_attack_timer > 0 && player2_attack_timer < PLAYER2_ATTACK_DURATION)
     {
         player2_attack_timer += 1;
     }
     else
+    {
         player2_attack_timer = 0;
+    }
 }
 
 int main()

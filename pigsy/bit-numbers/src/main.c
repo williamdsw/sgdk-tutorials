@@ -68,11 +68,11 @@ int main()
         VDP_drawTextBG(BG_A, text_32bit, 0, 9);
         number_32bit += 1000000;
 
-        sprintf(text_fixed16, "%10i", fix16ToInt(fixed16_number));
+        sprintf(text_fixed16, "%10i", F16_toInt(fixed16_number));
         VDP_drawTextBG(BG_A, text_fixed16, 0, 11);
         fixed16_number += FIX16(0.0157);
 
-        sprintf(text_fixed32, "%10i", fix32ToInt(fixed32_number));
+        sprintf(text_fixed32, "%10i", F32_toInt(fixed32_number));
         VDP_drawTextBG(BG_A, text_fixed32, 0, 13);
         fixed32_number += FIX32(0.001);
 

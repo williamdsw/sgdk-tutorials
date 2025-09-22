@@ -1,3 +1,4 @@
+// 2025-09-22 - It's not building
 
 #include <genesis.h>
 #include <resources.h>
@@ -46,7 +47,7 @@ int main()
 
     MAP_scrollTo(level_map, 0, 0);
 
-    spr_player = SPR_addSprite(&mickey_img, fix32ToInt(player_x), fix32ToInt(player_y), TILE_ATTR(PAL2, FALSE, FALSE, FALSE));
+    spr_player = SPR_addSprite(&mickey_img, F32_toInt(player_x), F32_toInt(player_y), TILE_ATTR(PAL2, FALSE, FALSE, FALSE));
 
     while (1)
     {
@@ -107,8 +108,8 @@ static void handleCamera()
     }
 
     // position of player on map as a whole number
-    s16 player_x_map = fix32ToInt(player_x);
-    s16 player_y_map = fix32ToInt(player_y);
+    s16 player_x_map = F32_toInt(player_x);
+    s16 player_y_map = F32_toInt(player_y);
 
     // player position on screen
     s16 player_x_position_on_screen = player_x_map - current_camera_x;
@@ -174,5 +175,5 @@ static void handleCamera()
         MAP_scrollTo(level_map, current_camera_x, current_camera_y);
     }
 
-    SPR_setPosition(spr_player, fix32ToInt(player_x) - new_camera_x, fix32ToInt(player_y) - new_camera_y);
+    SPR_setPosition(spr_player, F32_toInt(player_x) - new_camera_x, F32_toInt(player_y) - new_camera_y);
 }

@@ -3,7 +3,7 @@
 #include <resources.h>
 
 u16 ind = TILE_USER_INDEX;
-Map *level_1_map;
+// Map *level_1_map;
 int x = 0;
 int y = 768;
 
@@ -43,11 +43,12 @@ int main()
     PAL_setPalette(PAL1, obj_mario.palette->data, DMA);
 
     VDP_loadTileSet(&our_tileset, ind, DMA);
-    level_1_map = MAP_create(&our_level_map, BG_B, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind));
+    // level_1_map = MAP_create(&our_level_map, BG_B, TILE_ATTR_FULL(PAL0, FALSE, FALSE, FALSE, ind));
     ind += our_tileset.numTile;
+    // Map is glitched here
     // MAP_scrollTo(level_1_map, x, y);
 
-    spr_player = SPR_addSprite(&obj_mario, fix32ToInt(player_x), fix32ToInt(player_y), TILE_ATTR_FULL(PAL1, FALSE, FALSE, FALSE, ind));
+    spr_player = SPR_addSprite(&obj_mario, F32_toInt(player_x), F32_toInt(player_y), TILE_ATTR_FULL(PAL1, FALSE, FALSE, FALSE, ind));
     SPR_setAnim(spr_player, 0);
     SPR_update();
 
@@ -112,8 +113,8 @@ static void handleCamera()
     }
 
     // position of player on map as a whole number
-    int player_x_map = fix32ToInt(player_x);
-    int player_y_map = fix32ToInt(player_y);
+    int player_x_map = F32_toInt(player_x);
+    int player_y_map = F32_toInt(player_y);
 
     // player position on screen
     int player_x_position_on_screen = player_x_map - current_camera_x;
@@ -175,9 +176,9 @@ static void handleCamera()
     {
         current_camera_x = new_camera_x;
         current_camera_y = new_camera_y;
-        MAP_scrollTo(level_1_map, current_camera_x, current_camera_y);
+        // MAP_scrollTo(level_1_map, current_camera_x, current_camera_y);
         kprintf("current_camera_x: %d, current_camera_y: %d\0", current_camera_x, current_camera_y);
     }
 
-    SPR_setPosition(spr_player, fix32ToInt(player_x) - new_camera_x, fix32ToInt(player_y) - new_camera_y);
+    SPR_setPosition(spr_player, F32_toInt(player_x) - new_camera_x, F32_toInt(player_y) - new_camera_y);
 }
